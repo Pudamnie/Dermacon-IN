@@ -1,4 +1,5 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { COLORS, FONT, SPACING } from "../constants/theme";
 
 export default function UpcomingCard({ data }) {
   return (
@@ -51,25 +52,25 @@ export default function UpcomingCard({ data }) {
 
 const styles = StyleSheet.create({
   wrapper: {
-    marginBottom: 32,
+    marginBottom: SPACING.sectionGap
   },
 
   sectionTitle: {
     fontSize: 18,
-    fontFamily: "PoppinsSemiBold",
+    fontFamily: FONT.title,
     marginBottom: 12,
-    color: "#0F172A",
+    color: COLORS.textPrimary,
   },
 
   card: {
-    backgroundColor: "#F8FAFC",
+    backgroundColor: COLORS.card,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: COLORS.border,
     borderRadius: 16,
     paddingVertical: 18,
-    paddingHorizontal: 20,
+    paddingHorizontal: SPACING.cardPadding,
     flexDirection: "row",
-    padding: 16,
+   
     width: "100%",
 
     shadowColor: "000",
@@ -87,7 +88,7 @@ const styles = StyleSheet.create({
     width: 4,
     borderTopLeftRadius: 16,
     borderBottomLeftRadius: 16,
-    backgroundColor: "#1E3A8A",
+    backgroundColor: COLORS.primary,
     
   },
 
@@ -110,21 +111,21 @@ const styles = StyleSheet.create({
 
   doctorName: {
     fontSize: 16,
-    fontFamily: "PoppinsSemiBold",
-    color: "#0F172A",
+    fontFamily: FONT.title,
+    color: COLORS.textPrimary,
   },
 
   time: {
     fontSize: 14,
-    fontFamily: "PoppinsRegular",
-    color: "#6474BB",
+    fontFamily: FONT.regular,
+    color: COLORS.textSecondary,
     marginTop: 2,
   },
 
   viewDetails: {
     fontSize: 13,
-    fontFamily: "PoppinsMedium",
-    color: "#2563EB",
+    fontFamily: FONT.medium,
+    color: COLORS.primary,
     alignSelf: "flex-end",
     marginTop: 10,
   },

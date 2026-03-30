@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { COLORS, FONT, SPACING } from "../constants/theme";
 
 export default function HomeHeader({ name, hasNotification }) {
   return (
@@ -13,7 +14,7 @@ export default function HomeHeader({ name, hasNotification }) {
         </View>
 
         <TouchableOpacity style={styles.notificationContainer}>
-          <Ionicons name="notifications-outline" size={24} color="#1E3A8A" />
+          <Ionicons name="notifications-outline" size={24} color ={COLORS.secondary} />
           {hasNotification && <View style={styles.dot} />}
         </TouchableOpacity>
       </View>
@@ -30,50 +31,56 @@ export default function HomeHeader({ name, hasNotification }) {
 const styles = StyleSheet.create({
 
   wrapper: {
-    paddingTop: 20,
-    marginBottom: 28,
+    paddingTop: 8,
+    marginBottom: SPACING.sectionGap,
   },
 
   topRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start",
   },
 
   greeting: {
     fontSize: 24,
-    fontFamily: "PoppinsSemiBold",
-    color: "#1F3ABA",
-    lineHeight:26,
+    fontFamily: FONT.title,
+    color: COLORS.secondary,
+    lineHeight:32,
   },
 
   name: {
     fontSize: 24,
-    fontFamily: "PoppinsSemiBold",
-    color: "#1F3ABA",
+    fontFamily: FONT.title,
+    color: COLORS.secondary,
     marginTop: -6,
   },
 
   subtitle: {
     fontSize: 14,
-    fontFamily: "PoppinsRegular",
-    color: "#64748B",
+    fontFamily: FONT.regular,
+    color: COLORS.textSecondary,
     marginTop: 4,   
   },
 
   notificationContainer: {
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
     position: "relative",
-    padding: 8,
+    marginTop: 4,
+    
+   
   },
 
   dot: {
     position: "absolute",
-    top: 0,
-    right: 0,
+    top: 6,
+    right: 6,
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#EF4444",
+    backgroundColor: COLORS.danger,
   },
 
 });

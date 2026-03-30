@@ -1,6 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { COLORS, FONT, SPACING } from "../constants/theme";
+
 export default function RoutineCard({ data }) {
 
   const upcomingRoutines = data.slice(0, 2);
@@ -15,8 +17,8 @@ export default function RoutineCard({ data }) {
          Today's Routine
         </Text>
 
-        <TouchableOpacity onPress={() => router.push("/(tabs)/MyCareScreen")}>
-          <Ionicons name="chevron-forward" size={20} color="#64748B" />
+        <TouchableOpacity onPress={() => router.push("/(tabs)/ProfileScreen")}>
+          <Ionicons name="chevron-forward" size={20} color={COLORS.textSecondary} />
         </TouchableOpacity>
     </View>
 
@@ -31,7 +33,7 @@ export default function RoutineCard({ data }) {
                 <Ionicons
                   name={item.time === "Morning" ? "sunny-outline" : "moon-outline"}
                   size={22}
-                  color={item.time === "Morning" ? "#F4B740" : "#3B82F6"}
+                  color={item.time === "Morning" ? COLORS.warning : COLORS.routineNight}
                 />
               </View>
 
@@ -60,25 +62,25 @@ export default function RoutineCard({ data }) {
 
 const styles = StyleSheet.create({
   wrapper: {
-    marginBottom: 32,
+    marginBottom: SPACING.sectionGap,
   },
 
   sectionTitle: {
     fontSize: 18,
-    fontFamily: "PoppinsSemiBold",
+    fontFamily: FONT.title,
     marginBottom: 12,
-    color: "#0F172A",
+    color: COLORS.textPrimary,
   },
 
 card: {
-  backgroundColor: "#F8FAFC",
+  backgroundColor: COLORS.card,
   borderWidth: 1,
-  borderColor: "#E2E8F0",
+  borderColor: COLORS.border,
   borderRadius: 16,
   width: "100%",
 
   paddingVertical: 18,
-  paddingHorizontal: 20,
+  paddingHorizontal: SPACING.cardPadding,
 
   shadowColor: "#000",
   shadowOpacity: 0.06,
@@ -100,8 +102,8 @@ card: {
 
   routineName: {
     fontSize: 15,
-    fontFamily: "PoppinsSemiBold",
-    color: "#0F172A",
+    fontFamily: FONT.title,
+    color: COLORS.textPrimary,
   },
 
   header: {
@@ -113,14 +115,27 @@ card: {
 
   routineTime: {
     fontSize: 14,
-    fontFamily: "PoppinsRegular",
-    color: "#64748B",
+    fontFamily: FONT.regular,
+    color: COLORS.textSecondary,
     marginTop: 2,
   },
 
   divider: {
     height: 1,
-    backgroundColor: "#E2E8F0",
+    backgroundColor: COLORS.border,
     marginVertical: 10,
   },
 });
+
+
+
+
+
+
+
+
+
+
+
+
+ 

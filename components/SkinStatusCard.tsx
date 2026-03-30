@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Animated, StyleSheet, Text, View } from "react-native";
+import { COLORS, FONT, SPACING } from "../constants/theme";
 
 export default function SkinStatusCard({ data }) {
 
@@ -93,26 +94,24 @@ export default function SkinStatusCard({ data }) {
 const styles = StyleSheet.create({
 
   wrapper: {
-    marginBottom: 32,
+    marginBottom: SPACING.sectionGap,
   },
 
   sectionTitle: {
     fontSize: 18,
-    fontFamily: "PoppinsSemiBold",
+    fontFamily: FONT.title,
     marginBottom: 12,
-    color: "#0F172A",
+    color: COLORS.textPrimary,
   },
 
   card: {
-    backgroundColor: "#F8FAFC",
+    backgroundColor: COLORS.card,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: COLORS.border,
     borderRadius: 16,
-    width: "100%",
-
-
     paddingVertical: 18,
-    paddingHorizontal: 20,
+    paddingHorizontal: SPACING.cardPadding,
+   
 
     shadowColor: "#000",
     shadowOpacity: 0.05,
@@ -128,14 +127,14 @@ const styles = StyleSheet.create({
 
   condition: {
     fontSize: 19,
-    fontFamily: "PoppinsSemiBold",
-    color: "#0F172A",
+    fontFamily: FONT.title,
+    color: COLORS.textPrimary,
   },
 
   score: {
     fontSize: 14,
-    fontFamily: "PoppinsMedium",
-    color: "#64748B",
+    fontFamily: FONT.medium,
+      color: COLORS.textSecondary,
   },
 
   progressBackground: {
@@ -147,7 +146,7 @@ const styles = StyleSheet.create({
 
   progressFill: {
     height: 6,
-    backgroundColor: "#14B8A6",
+    backgroundColor: COLORS.success,
     borderRadius: 6,
   },
 
@@ -158,21 +157,21 @@ const styles = StyleSheet.create({
 
   statusLabel: {
     fontSize: 14,
-    fontFamily: "PoppinsMedium",
-    color: "#0F172A",
+    fontFamily: FONT.medium,
+    color: COLORS.textPrimary,
     marginRight: 6,
   },
 
   statusValue: {
     fontSize: 14,
-    fontFamily: "PoppinsMedium",
-    color: "#14B8A6",
+    fontFamily: FONT.medium,
+    color: COLORS.success,
   },
 
   lastScan: {
     fontSize: 13,
-    fontFamily: "PoppinsRegular",
-    color: "#64748B",
+    fontFamily: FONT.regular,
+    color: COLORS.primary,
   },
 
   viewDetails: {

@@ -1,8 +1,13 @@
 import { ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { COLORS, SPACING } from "../../constants/theme";
 
+
+import ConsultDoctorCard from "../../components/ConsultDoctorCard";
+import EmptyRoutineCard from "../../components/EmptyRoutineCard";
 import HomeHeader from "../../components/HomeHeader";
 import RoutineCard from "../../components/RoutineCard";
+import SkinScanCard from "../../components/SkinScanCard";
 import SkinStatusCard from "../../components/SkinStatusCard";
 import UpcomingCard from "../../components/UpcomingCard";
 
@@ -11,29 +16,14 @@ export default function HomeScreen() {
   const userData = {
     name: "Sanduni",
 
-    appointment: {
-      doctor: "Dr. Amanda Perera",
-      time: "Today - 2:00 PM",
-      doctorImage: require("../../assets/images/doctor.jpg"),
-    },
+    appointment: null,
 
-    skinStatus: {
-      disease: "Acne - Mild",
-      score: 78,
-      previousScore: 70,
-      lastScanDays: 5,
-    },
+    skinStatus: null,
+    
+  
 
-    routine: [
-      {
-        name: "Gentle Cleanser",
-        time: "Morning",
-      },
-      {
-        name: "Moisturizer",
-        time: "Evening",
-      },
-    ],
+    routine: [],
+    
   };
 
   return (
@@ -49,17 +39,43 @@ export default function HomeScreen() {
           hasNotification={true}
         />
 
-        {userData.appointment && (
-          <UpcomingCard data={userData.appointment} />
-        )}
+        {/*  CASE 1 — HAS APPOINTMENT (OLD USER) */}
+{userData.appointment ? (
+  <>
+    <UpcomingCard data={userData.appointment} />
 
-        {userData.skinStatus && (
-          <SkinStatusCard data={userData.skinStatus} />
-        )}
+    {userData.skinStatus && (
+      <SkinStatusCard data={userData.skinStatus} />
+    )}
 
-        {userData.routine.length > 0 && (
-          <RoutineCard data={userData.routine} />
-        )}
+    {userData.routine.length > 0 ? (
+      <RoutineCard data={userData.routine} />
+    ) : (
+      <EmptyRoutineCard />
+    )}
+  </>
+) : (
+  /*  CASE 2 — NO APPOINTMENT */
+  <>
+    {/* SCAN OR STATUS */}
+    {userData.skinStatus ? (
+      <SkinStatusCard data={userData.skinStatus} />
+    ) : (
+      <SkinScanCard />
+    )}
+
+    {/* CONSULT */}
+    <ConsultDoctorCard />
+
+    {/* ROUTINE */}
+    {userData.routine.length > 0 ? (
+      <RoutineCard data={userData.routine} />
+    ) : (
+      <EmptyRoutineCard />
+    )}
+  </>
+)}
+        
 
       </ScrollView>
 
@@ -70,14 +86,15 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
 
   container: {
-    flex: 1,
-    backgroundColor: "#F8FAFC",
-    paddingHorizontal: 24,
-  },
+  flex: 1,
+  backgroundColor: COLORS.background,
+  paddingHorizontal: SPACING.screenHorizontal,
+},
 
-  scrollContent: {
-    paddingTop: 20,
-    minHeight: "100%",
-  },
+scrollContent: {
+  paddingTop: 10,
+  minHeight: "100%",
+},
 
 });
+
