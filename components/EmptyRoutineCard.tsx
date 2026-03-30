@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from "react-native";
-import { COLORS, FONT, SPACING } from "../constants/theme";
+import { CARD, COLORS, FONT, SPACING } from "../constants/theme";
+import BaseCard from "./BaseCard";
 
 export default function EmptyRoutineCard() {
   return (
@@ -11,7 +12,7 @@ export default function EmptyRoutineCard() {
       </Text>
 
       {/* Card */}
-      <View style={styles.card}>
+      <BaseCard style={styles.card}>
 
         <Text style={styles.title}>
           No routine yet
@@ -21,7 +22,7 @@ export default function EmptyRoutineCard() {
           Your treatment plan will appear here after consultation
         </Text>
 
-      </View>
+      </BaseCard>
 
     </View>
   );
@@ -42,18 +43,11 @@ const styles = StyleSheet.create({
 
   card: {
     backgroundColor: COLORS.card,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 16,
     paddingVertical: 20,
-    paddingHorizontal: SPACING.cardPadding,
+ 
+    ...CARD.borderLight,
+},
 
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
-  },
 
   title: {
     fontSize: 15,
@@ -69,3 +63,5 @@ const styles = StyleSheet.create({
   },
 
 });
+
+

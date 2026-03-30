@@ -1,5 +1,7 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { COLORS, FONT, SPACING } from "../constants/theme";
+import BaseCard from "./BaseCard";
+
 
 export default function SkinScanCard() {
   return (
@@ -9,7 +11,7 @@ export default function SkinScanCard() {
         Start Your First Scan
       </Text>
 
-      <View style={styles.card}>
+      <BaseCard style={styles.card}>
         <Text style={styles.title}>
           AI Skin Analysis
         </Text>
@@ -21,7 +23,7 @@ export default function SkinScanCard() {
         <TouchableOpacity style={styles.button}>
           <Text style={styles.buttonText}>Start Scan</Text>
         </TouchableOpacity>
-      </View>
+      </BaseCard>
 
     </View>
   );
@@ -39,12 +41,20 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     color: COLORS.textPrimary,
   },
-
+  
+  
+  
+  
   card: {
     backgroundColor: COLORS.primary,
-    borderRadius: 20,
+    
     paddingVertical: 24,
-    paddingHorizontal: SPACING.cardPadding,
+   
+
+  
+
+
+    
   },
 
   title: {
@@ -66,7 +76,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     paddingHorizontal: 22,
     paddingVertical: 10,
-    borderRadius: 20,
+    borderRadius: 22,
   },
 
   buttonText: {

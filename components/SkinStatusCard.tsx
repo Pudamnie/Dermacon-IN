@@ -1,6 +1,10 @@
 import { useEffect, useRef } from "react";
 import { Animated, StyleSheet, Text, View } from "react-native";
-import { COLORS, FONT, SPACING } from "../constants/theme";
+import { CARD, COLORS, FONT, SPACING } from "../constants/theme";
+import BaseCard from "./BaseCard";
+
+
+
 
 export default function SkinStatusCard({ data }) {
 
@@ -37,7 +41,7 @@ export default function SkinStatusCard({ data }) {
       </Text>
 
       {/* Card */}
-      <View style={styles.card}>
+      <BaseCard style={styles.card}>
 
         <View style={styles.block}>
           <Text style={styles.condition}>
@@ -84,7 +88,7 @@ export default function SkinStatusCard({ data }) {
           View Details
         </Text>
 
-      </View>
+      </BaseCard>
 
     </View>
   );
@@ -106,18 +110,12 @@ const styles = StyleSheet.create({
 
   card: {
     backgroundColor: COLORS.card,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 16,
+   
     paddingVertical: 18,
-    paddingHorizontal: SPACING.cardPadding,
+
+    ...CARD.borderLight,
    
 
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
   },
 
   // consistent spacing block
@@ -176,8 +174,8 @@ const styles = StyleSheet.create({
 
   viewDetails: {
     fontSize: 13,
-    fontFamily: "PoppinsMedium",
-    color: "#2563EB",
+    fontFamily: FONT.medium,
+    color: COLORS.primary,
     alignSelf: "flex-end",
     marginTop: 10,
   },

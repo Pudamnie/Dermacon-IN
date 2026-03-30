@@ -1,5 +1,7 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { COLORS, FONT, SPACING } from "../constants/theme";
+import { CARD, COLORS, FONT, SPACING } from "../constants/theme";
+import BaseCard from "./BaseCard";
+
 
 export default function UpcomingCard({ data }) {
   return (
@@ -11,7 +13,7 @@ export default function UpcomingCard({ data }) {
       </Text>
 
       {/* Card */}
-      <View style={styles.card}>
+      <BaseCard style={styles.card}>
 
         {/* Left Action Bar */}
         <View style={styles.leftBar} />
@@ -44,7 +46,7 @@ export default function UpcomingCard({ data }) {
           </TouchableOpacity>
 
         </View>
-      </View>
+      </BaseCard>
     </View>
   );
 }
@@ -64,20 +66,13 @@ const styles = StyleSheet.create({
 
   card: {
     backgroundColor: COLORS.card,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 16,
-    paddingVertical: 18,
-    paddingHorizontal: SPACING.cardPadding,
-    flexDirection: "row",
-   
     width: "100%",
+    paddingVertical: 18,
 
-    shadowColor: "000",
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    shadowOffset: {width:0, height:4},
-    elevation: 3,
+    flexDirection: "row",
+  
+    ...CARD.borderLight,
+    
   },
 
   leftBar: {

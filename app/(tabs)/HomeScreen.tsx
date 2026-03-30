@@ -19,7 +19,6 @@ export default function HomeScreen() {
     appointment: null,
 
     skinStatus: null,
-    
   
 
     routine: [],

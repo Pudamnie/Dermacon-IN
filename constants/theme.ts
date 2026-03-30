@@ -24,3 +24,22 @@ export const FONT = {
   medium: "PoppinsMedium",
   regular: "PoppinsRegular",
 };
+
+
+
+export const CARD = {
+  radius: 20,
+
+  shadow: {
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+  },
+
+  borderLight: {
+    borderWidth: 1,
+    borderColor: "#E3E8E7",
+  },
+};

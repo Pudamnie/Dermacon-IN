@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { COLORS, FONT, SPACING } from "../constants/theme";
+import { CARD, COLORS, FONT, SPACING } from "../constants/theme";
+import BaseCard from "./BaseCard";
 
 export default function RoutineCard({ data }) {
 
@@ -22,7 +23,7 @@ export default function RoutineCard({ data }) {
         </TouchableOpacity>
     </View>
 
-      <View style={styles.card}>
+      <BaseCard style={styles.card}>
 
 
             {upcomingRoutines.map((item, index) => (
@@ -55,7 +56,7 @@ export default function RoutineCard({ data }) {
           </View>
         ))}
 
-      </View>
+      </BaseCard>
     </View>
   );
 }
@@ -74,19 +75,14 @@ const styles = StyleSheet.create({
 
 card: {
   backgroundColor: COLORS.card,
-  borderWidth: 1,
-  borderColor: COLORS.border,
-  borderRadius: 16,
+  
   width: "100%",
 
   paddingVertical: 18,
-  paddingHorizontal: SPACING.cardPadding,
+  
+  ...CARD.borderLight
 
-  shadowColor: "#000",
-  shadowOpacity: 0.06,
-  shadowRadius: 10,
-  shadowOffset: { width: 0, height: 6 },
-  elevation: 4,
+ 
 },
 
   row: {
