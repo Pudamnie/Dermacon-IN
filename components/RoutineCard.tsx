@@ -80,7 +80,7 @@ card: {
 
   paddingVertical: 18,
   
-  ...CARD.borderLight
+  ...CARD.borderLight,
 
  
 },
