@@ -4,6 +4,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-nati
 
 import DoctorCard from "../../components/DoctorCard";
 import PageHeader from "../../components/PageHeader";
+import ScheduledCard from "../../components/ScheduledCard";
 import ScreenLayout from "../../components/ScreenLayout";
 import { COLORS, FONT } from "../../constants/theme";
 
@@ -30,7 +31,7 @@ export default function ConsultScreen() {
     },
     {
       id: "3",
-      name: "Dr. Stevi Jess",
+      name: "Dr. Saman Perera",
       specialty: "Dermatologist",
       rating: "4.8",
       image: doctorImage,
@@ -109,9 +110,41 @@ export default function ConsultScreen() {
           </ScrollView>
         </>
       ) : (
-        <View style={styles.emptyBox}>
-          <Text style={styles.emptyText}>No scheduled appointments yet</Text>
-        </View>
+        <>
+          {/* SCHEDULED CARDS */}
+          <ScheduledCard
+            appointment={{
+              name: "Dr. Amanda Perera",
+              speciality: "Dermatologist",
+              date: "26/06/2026",
+              time: "10:30 AM",
+              status: "confirmed",
+              image: doctorImage,
+            }}
+          />
+
+          <ScheduledCard
+            appointment={{
+              name: "Dr. kumarathunga minusasa",
+              speciality: "Dermatologist",
+              date: "26/06/2026",
+              time: "11:30 AM",
+              status: "ongoing",
+              image: doctorImage,
+            }}
+          />
+
+          <ScheduledCard
+            appointment={{
+              name: "Dr. Stevi Jess",
+              speciality: "Dermatologist",
+              date: "25/06/2026",
+              time: "09:00 AM",
+              status: "completed",
+              image: doctorImage,
+            }}
+          />
+        </>
       )}
 
     </ScreenLayout>

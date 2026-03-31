@@ -30,7 +30,7 @@ export default function DoctorCard({ doctor }) {
 const styles = StyleSheet.create({
   card: {
     width: 150,
-    minHeight: 180, // 🔥 flexible height
+    minHeight: 180, 
 
     borderRadius: 20,
     borderWidth: 1,
@@ -78,3 +78,10 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
 });
+
+
+
+
+
+
+
