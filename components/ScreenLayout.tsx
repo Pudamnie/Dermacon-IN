@@ -18,6 +18,7 @@ export default function ScreenLayout({
           style={{ flex: 1 }}
           contentContainerStyle={styles.container}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
           {children}
         </ScrollView>
@@ -40,8 +41,9 @@ const styles = StyleSheet.create({
   },
 
   container: {
+    flexGrow: 1, // 🔥 VERY IMPORTANT (fix overflow)
     paddingHorizontal: SPACING.screenHorizontal,
     paddingTop: 12,
-    paddingBottom: 20,
+    paddingBottom: 40, // 🔥 prevents button hiding
   },
 });
