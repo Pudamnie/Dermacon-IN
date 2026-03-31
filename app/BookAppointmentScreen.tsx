@@ -9,16 +9,16 @@ import visaImage from "../assets/images/visa.png";
 
 export default function BookAppointmentScreen() {
 
-  // 🔥 CHANGE THIS TEXT TO TEST (MUST REFLECT)
+  // 🔥 DEBUG CHANGE (YOU MUST SEE THIS CHANGE)
   const data = {
     doctor: {
-      name: "Dr. Marcus (UPDATED)", // ← change this to test
+      name: "iuytrf",
       speciality: "Dermatologist",
       rating: 4.7,
       image: doctorImage,
     },
     booking: {
-      dateTime: "Wednesday, Jun 23, 2026 - 10:00 AM",
+      dateTime: " UPDATED DATE ",
       reason: "Chest pain",
     },
     payment: {
@@ -32,11 +32,6 @@ export default function BookAppointmentScreen() {
     <ScreenLayout>
 
       <PageHeader title="Book Appointment" showBack />
-
-      {/* DEBUG TEXT (safe, small, won't break UI) */}
-      <Text style={{ fontSize: 10, color: "#94A3B8", marginBottom: 6 }}>
-        Debug: BookAppointmentScreen Active
-      </Text>
 
       {/* DOCTOR CARD */}
       <View style={styles.card}>
@@ -74,7 +69,7 @@ export default function BookAppointmentScreen() {
 
         <View style={styles.row}>
           <View style={styles.iconCircle}>
-            {/* ✅ centered industry icon */}
+            {/* ✅ Clean centered note icon */}
             <Ionicons name="create-outline" size={18} color="#1F3A8A" />
           </View>
 
@@ -149,7 +144,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: FONT.title,
     color: "#0F172A",
-    flexWrap: "wrap",
   },
 
   speciality: {
@@ -190,9 +184,9 @@ const styles = StyleSheet.create({
   },
 
   iconCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: "#E2E8F0",
     justifyContent: "center",
     alignItems: "center",
@@ -247,8 +241,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E2E8F0",
     justifyContent: "center",
-    alignItems: "flex-start", // left aligned (industry)
-    paddingHorizontal: 14,
+    alignItems: "flex-start", // LEFT aligned
+    paddingLeft: 14,
   },
 
   visa: {

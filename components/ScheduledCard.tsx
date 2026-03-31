@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 14,
     gap: 14,
-    flexWrap: "wrap", // ✅ prevents overflow on small screens
+    flexWrap: "wrap", // prevents overflow on small screens
   },
 
   rowItem: {
