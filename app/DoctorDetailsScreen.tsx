@@ -66,7 +66,7 @@ export default function DoctorDetailsScreen() {
       return;
     }
 
-    router.push({
+    router.replace({
       pathname: "/BookAppointmentScreen",
       params: {
         doctorName: doctor.name,

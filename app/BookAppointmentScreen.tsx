@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import PageHeader from "../components/PageHeader";
 import ScreenLayout from "../components/ScreenLayout";
@@ -9,11 +9,10 @@ import doctorImage from "../assets/images/consultDoctor.png";
 import visaImage from "../assets/images/visa.png";
 
 export default function BookAppointmentScreen() {
-
-  //  RECEIVE DATA FROM DOCTOR SCREEN (INDUSTRY WAY)
+  const router = useRouter();
   const params = useLocalSearchParams();
 
-  // SAFE DATA STRUCTURE (FIREBASE READY)
+  // SAFE DATA (FIREBASE READY)
   const doctor = {
     name: params.doctorName || "Dr. Perara",
     speciality: params.speciality || "Dermatologist",
@@ -25,8 +24,8 @@ export default function BookAppointmentScreen() {
     dateTime:
       params.date && params.time
         ? `${params.date} - ${params.time}`
-        : "UPDATED DATE",
-    reason: "Melanoma", // 🔥 later from Firebase / user input
+        : "Thu 24 - 02:00 PM",
+    reason: "Melanoma",
   };
 
   const payment = {
@@ -35,9 +34,13 @@ export default function BookAppointmentScreen() {
     total: 1100,
   };
 
+  // INDUSTRY SAFE SPLIT (no crash)
+  const [date, time] = booking.dateTime.includes(" - ")
+    ? booking.dateTime.split(" - ")
+    : ["Unknown Date", "Unknown Time"];
+
   return (
     <ScreenLayout>
-
       <PageHeader title="Book Appointment" showBack />
 
       {/* DOCTOR CARD */}
@@ -120,18 +123,32 @@ export default function BookAppointmentScreen() {
       <TouchableOpacity
         style={styles.button}
         onPress={() => {
-          // 🔥 FUTURE: Firebase booking save here
-          console.log("Booking confirmed", {
-            doctor,
-            booking,
-            payment,
+
+          // FIREBASE READY OBJECT
+          const bookingData = {
+            doctorName: doctor.name,
+            speciality: doctor.speciality,
+            rating: doctor.rating,
+            date,
+            time,
+            reason: booking.reason,
+            total: payment.total,
+            status: "confirmed",
+            createdAt: new Date().toISOString(),
+          };
+
+          console.log("Booking saved:", bookingData);
+
+          // NAVIGATE WITH DATA (INDUSTRY WAY)
+          router.replace({
+            pathname: "/PaymentSuccessScreen",
+            params: bookingData,
           });
-          alert("Booking Confirmed ✅");
+
         }}
       >
         <Text style={styles.buttonText}>Booking</Text>
       </TouchableOpacity>
-
     </ScreenLayout>
   );
 }
@@ -139,7 +156,6 @@ export default function BookAppointmentScreen() {
 const SPACING = 14;
 
 const styles = StyleSheet.create({
-
   card: {
     flexDirection: "row",
     gap: 14,

@@ -1,6 +1,13 @@
-import { useRouter } from "expo-router";
-import { useState } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
+import {
+  BackHandler,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 import DoctorCard from "../../components/DoctorCard";
 import PageHeader from "../../components/PageHeader";
@@ -12,9 +19,14 @@ import doctorImage from "../../assets/images/consultDoctor.png";
 
 export default function ConsultScreen() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState("book");
+  const params = useLocalSearchParams();
 
-  const doctors = [
+  const [activeTab, setActiveTab] = useState("book");
+  const [newAppointment, setNewAppointment] = useState(null);
+
+  // ✅ FIREBASE READY STATES
+
+  const [topDoctors, setTopDoctors] = useState([
     {
       id: "1",
       name: "Dr. Saman Perera",
@@ -36,11 +48,72 @@ export default function ConsultScreen() {
       rating: "4.8",
       image: doctorImage,
     },
-  ];
+  ]);
+
+  const [recentDoctors, setRecentDoctors] = useState([
+    {
+      id: "r1",
+      name: "Dr. Amanda Perera",
+      specialty: "Dermatologist",
+      rating: "4.8",
+      image: doctorImage,
+      lastVisited: "2026-03-28",
+    },
+    {
+      id: "r2",
+      name: "Dr. Kumarathunga",
+      specialty: "Dermatologist",
+      rating: "4.6",
+      image: doctorImage,
+      lastVisited: "2026-03-25",
+    },
+  ]);
+
+  // ✅ SORT RECENT (LATEST FIRST)
+  const sortedRecentDoctors = [...recentDoctors].sort(
+    (a, b) => new Date(b.lastVisited) - new Date(a.lastVisited)
+  );
+
+  // ✅ HANDLE NAVIGATION PARAMS
+  useEffect(() => {
+    if (params.tab === "scheduled" && activeTab !== "scheduled") {
+      setActiveTab("scheduled");
+
+      if (params.name) {
+        setNewAppointment({
+          name: params.name,
+          speciality: params.speciality,
+          date: params.date,
+          time: params.time,
+          status: params.status || "confirmed",
+          image: doctorImage,
+        });
+      }
+    }
+  }, [params.tab]);
+
+  // ✅ BACK HANDLER FIX
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        if (activeTab === "scheduled") {
+          setActiveTab("book");
+          return true;
+        }
+        return false;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress
+      );
+
+      return () => subscription.remove();
+    }, [activeTab])
+  );
 
   return (
     <ScreenLayout>
-
       <PageHeader title="Consultation" showBack />
 
       {/* TOGGLE */}
@@ -82,10 +155,19 @@ export default function ConsultScreen() {
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View style={styles.row}>
-              {doctors.map((doc) => (
+              {topDoctors.map((doc) => (
                 <TouchableOpacity
                   key={doc.id}
-                  onPress={() => router.push(`/DoctorDetailsScreen?id=${doc.id}`)}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/DoctorDetailsScreen",
+                      params: {
+                        doctorName: doc.name,
+                        speciality: doc.specialty,
+                        rating: doc.rating,
+                      },
+                    })
+                  }
                 >
                   <DoctorCard doctor={doc} />
                 </TouchableOpacity>
@@ -93,25 +175,45 @@ export default function ConsultScreen() {
             </View>
           </ScrollView>
 
-          {/* RECENT */}
+          {/* RECENT DOCTORS */}
           <Text style={styles.sectionTitle}>Your Recent Doctors</Text>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View style={styles.row}>
-              {doctors.map((doc) => (
-                <TouchableOpacity
-                  key={doc.id}
-                  onPress={() => router.push(`/DoctorDetailsScreen?id=${doc.id}`)}
-                >
-                  <DoctorCard doctor={doc} />
-                </TouchableOpacity>
-              ))}
+              {sortedRecentDoctors.length > 0 ? (
+                sortedRecentDoctors.map((doc) => (
+                  <TouchableOpacity
+                    key={doc.id}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/DoctorDetailsScreen",
+                        params: {
+                          doctorName: doc.name,
+                          speciality: doc.specialty,
+                          rating: doc.rating,
+                        },
+                      })
+                    }
+                  >
+                    <DoctorCard doctor={doc} />
+                  </TouchableOpacity>
+                ))
+              ) : (
+                <Text style={{ color: "#94A3B8", fontFamily: FONT.medium }}>
+                  No recent doctors yet
+                </Text>
+              )}
             </View>
           </ScrollView>
         </>
       ) : (
         <>
-          {/* SCHEDULED CARDS */}
+          {/* NEW BOOKED */}
+          {newAppointment && (
+            <ScheduledCard appointment={newAppointment} />
+          )}
+
+          {/* STATIC FALLBACK */}
           <ScheduledCard
             appointment={{
               name: "Dr. Amanda Perera",
@@ -122,31 +224,8 @@ export default function ConsultScreen() {
               image: doctorImage,
             }}
           />
-
-          <ScheduledCard
-            appointment={{
-              name: "Dr. kumarathunga minusasa",
-              speciality: "Dermatologist",
-              date: "26/06/2026",
-              time: "11:30 AM",
-              status: "ongoing",
-              image: doctorImage,
-            }}
-          />
-
-          <ScheduledCard
-            appointment={{
-              name: "Dr. Stevi Jess",
-              speciality: "Dermatologist",
-              date: "25/06/2026",
-              time: "09:00 AM",
-              status: "completed",
-              image: doctorImage,
-            }}
-          />
         </>
       )}
-
     </ScreenLayout>
   );
 }
@@ -225,15 +304,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 16,
     marginBottom: 24,
-  },
-
-  emptyBox: {
     alignItems: "center",
-    marginTop: 40,
-  },
-
-  emptyText: {
-    color: COLORS.textSecondary,
-    fontFamily: FONT.medium,
   },
 });
