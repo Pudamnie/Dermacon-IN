@@ -9,17 +9,17 @@ import visaImage from "../assets/images/visa.png";
 
 export default function BookAppointmentScreen() {
 
-  // 🔥 DEBUG CHANGE (YOU MUST SEE THIS CHANGE)
+ 
   const data = {
     doctor: {
-      name: "iuytrf",
+      name: "Dr. Perara",
       speciality: "Dermatologist",
       rating: 4.7,
       image: doctorImage,
     },
     booking: {
       dateTime: " UPDATED DATE ",
-      reason: "Chest pain",
+      reason: "Chwts",
     },
     payment: {
       consultation: 1000,

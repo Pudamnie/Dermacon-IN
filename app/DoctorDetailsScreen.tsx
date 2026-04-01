@@ -1,148 +1,235 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useRouter } from "expo-router";
+import { useState } from "react";
+import {
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+
 import PageHeader from "../components/PageHeader";
 import ScreenLayout from "../components/ScreenLayout";
 import { FONT } from "../constants/theme";
 
 import doctorImage from "../assets/images/consultDoctor.png";
-import visaImage from "../assets/images/visa.png";
 
-export default function BookAppointmentScreen() {
+export default function DoctorDetailsScreen() {
+  const router = useRouter();
 
-  // 🔥 CHANGE THIS TEXT TO TEST (MUST REFLECT)
-  const data = {
-    doctor: {
-      name: "Dr. Marcus (UPDATED)", // ← change this to test
-      speciality: "Dermatologist",
-      rating: 4.7,
-      image: doctorImage,
-    },
-    booking: {
-      dateTime: "Wednesday, Jun 23, 2026 - 10:00 AM",
-      reason: "Chest pain",
-    },
-    payment: {
-      consultation: 1000,
-      admin: 100,
-      total: 1100,
-    },
+  const [selectedDate, setSelectedDate] = useState<number | null>(null);
+  const [selectedTime, setSelectedTime] = useState<number | null>(null);
+  const [expanded, setExpanded] = useState(false);
+
+  // Replace with Firebase data
+  
+  const doctor = {
+    id: "doc_1",
+    name: "Dr. Amanda Perera Silva Fernando With Very Long Name",
+    speciality: "Dermatologist",
+    rating: "4.7",
+    description:
+      "Experienced dermatologist specializing in acne, eczema, and skin allergies. Providing personalized treatments and modern skincare solutions for all patients.",
+    image: doctorImage,
+  };
+
+  const dates = [
+    { id: 1, day: "Mon", date: "21", available: false },
+    { id: 2, day: "Tue", date: "22", available: true },
+    { id: 3, day: "Wed", date: "23", available: true },
+    { id: 4, day: "Thu", date: "24", available: true },
+    { id: 5, day: "Fri", date: "25", available: true },
+    { id: 6, day: "Sat", date: "26", available: true },
+    { id: 7, day: "Sun", date: "27", available: true },
+    { id: 8, day: "Mon", date: "28", available: true },
+  ];
+
+  const times = [
+    { id: 1, time: "09:00 AM", available: false },
+    { id: 2, time: "01:00 PM", available: false },
+    { id: 3, time: "02:00 PM", available: true },
+    { id: 4, time: "03:00 PM", available: true },
+    { id: 5, time: "07:00 PM", available: true },
+    { id: 6, time: "08:00 PM", available: true },
+  ];
+
+  // Get selected objects 
+
+  const selectedDateObj = dates.find(d => d.id === selectedDate);
+  const selectedTimeObj = times.find(t => t.id === selectedTime);
+
+  const handleBooking = () => {
+    if (!selectedDateObj || !selectedTimeObj) {
+      alert("Please select date and time");
+      return;
+    }
+
+    router.push({
+      pathname: "/BookAppointmentScreen",
+      params: {
+        doctorName: doctor.name,
+        speciality: doctor.speciality,
+        rating: doctor.rating,
+        date: `${selectedDateObj.day} ${selectedDateObj.date}`,
+        time: selectedTimeObj.time,
+      },
+    });
   };
 
   return (
     <ScreenLayout>
+      <PageHeader title="Doctor Detail" showBack />
 
-      <PageHeader title="Book Appointment" showBack />
+      {/* PROFILE */}
+      <View style={styles.section}>
+        <View style={styles.profileRow}>
+          <Image source={doctor.image} style={styles.image} />
 
-      {/* DEBUG TEXT (safe, small, won't break UI) */}
-      <Text style={{ fontSize: 10, color: "#94A3B8", marginBottom: 6 }}>
-        Debug: BookAppointmentScreen Active
-      </Text>
+          <View style={styles.profileText}>
+            <Text style={styles.name}>{doctor.name}</Text>
+            <Text style={styles.speciality}>{doctor.speciality}</Text>
 
-      {/* DOCTOR CARD */}
-      <View style={styles.card}>
-        <Image source={data.doctor.image} style={styles.doctorImage} />
-
-        <View style={{ flex: 1 }}>
-          <Text style={styles.name}>{data.doctor.name}</Text>
-          <Text style={styles.speciality}>{data.doctor.speciality}</Text>
-
-          <View style={styles.ratingRow}>
-            <Ionicons name="star" size={13} color="#1F3A8A" />
-            <Text style={styles.rating}>{data.doctor.rating}</Text>
+            <View style={styles.ratingRow}>
+              <Ionicons name="star" size={12} color="#1F3A8A" />
+              <Text style={styles.rating}>{doctor.rating}</Text>
+            </View>
           </View>
         </View>
       </View>
 
-      {/* DATE */}
+      {/* ABOUT */}
       <View style={styles.section}>
-        <Text style={styles.title}>Date</Text>
+        <Text style={styles.sectionTitle}>About</Text>
 
-        <View style={styles.row}>
-          <View style={styles.iconCircle}>
-            <Ionicons name="calendar-outline" size={18} color="#1F3A8A" />
-          </View>
+        <Text
+          style={styles.description}
+          numberOfLines={expanded ? undefined : 3}
+        >
+          {doctor.description}
+        </Text>
 
-          <Text style={styles.textWrap}>{data.booking.dateTime}</Text>
-        </View>
+        {doctor.description.length > 120 && (
+          <Text
+            style={styles.readMore}
+            onPress={() => setExpanded(!expanded)}
+          >
+            {expanded ? "Show less" : "Read more"}
+          </Text>
+        )}
       </View>
 
-      <View style={styles.divider} />
-
-      {/* REASON */}
+      {/* DATES */}
       <View style={styles.section}>
-        <Text style={styles.title}>Reason</Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.dateScroll}
+        >
+          {dates.map((item) => {
+            const isSelected = selectedDate === item.id;
 
-        <View style={styles.row}>
-          <View style={styles.iconCircle}>
-            {/* ✅ centered industry icon */}
-            <Ionicons name="create-outline" size={18} color="#1F3A8A" />
-          </View>
+            return (
+              <TouchableOpacity
+                key={item.id}
+                disabled={!item.available}
+                onPress={() => setSelectedDate(item.id)}
+                style={[
+                  styles.dateBox,
+                  {
+                    backgroundColor: isSelected ? "#1F3A8A" : "#FFFFFF",
+                    borderColor: item.available ? "#1F3A8A" : "#E2E8F0",
+                  },
+                ]}
+              >
+                <Text style={[
+                  styles.dayText,
+                  { color: isSelected ? "#FFF" : item.available ? "#1F3A8A" : "#E2E8F0" }
+                ]}>
+                  {item.day}
+                </Text>
 
-          <Text style={styles.textWrap}>{data.booking.reason}</Text>
-        </View>
+                <Text style={[
+                  styles.dateText,
+                  { color: isSelected ? "#FFF" : item.available ? "#1F3A8A" : "#E2E8F0" }
+                ]}>
+                  {item.date}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
       </View>
 
-      <View style={styles.divider} />
-
-      {/* PAYMENT */}
+      {/* DIVIDER */}
       <View style={styles.section}>
-        <Text style={styles.title}>Payment Detail</Text>
-
-        <View style={styles.paymentRow}>
-          <Text style={styles.label}>Consultation</Text>
-          <Text style={styles.value}>Rs {data.payment.consultation}.00</Text>
-        </View>
-
-        <View style={styles.paymentRow}>
-          <Text style={styles.label}>Admin Fee</Text>
-          <Text style={styles.value}>Rs {data.payment.admin}.00</Text>
-        </View>
-
-        <View style={styles.paymentRow}>
-          <Text style={styles.totalLabel}>Total</Text>
-          <Text style={styles.totalValue}>Rs {data.payment.total}.00</Text>
-        </View>
+        <View style={styles.divider} />
       </View>
 
-      <View style={styles.divider} />
-
-      {/* PAYMENT METHOD */}
+      {/* TIMES */}
       <View style={styles.section}>
-        <Text style={styles.title}>Payment Method</Text>
+        <View style={styles.timeGrid}>
+          {times.map((item) => {
+            const isSelected = selectedTime === item.id;
 
-        <View style={styles.paymentBox}>
-          <Image source={visaImage} style={styles.visa} resizeMode="contain" />
+            return (
+              <TouchableOpacity
+                key={item.id}
+                disabled={!item.available}
+                onPress={() => setSelectedTime(item.id)}
+                style={[
+                  styles.timeBox,
+                  {
+                    backgroundColor: isSelected ? "#1F3A8A" : "#FFFFFF",
+                    borderColor: item.available ? "#1F3A8A" : "#E2E8F0",
+                  },
+                ]}
+              >
+                <Text style={[
+                  styles.timeText,
+                  { color: isSelected ? "#FFF" : item.available ? "#1F3A8A" : "#E2E8F0" }
+                ]}>
+                  {item.time}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
       </View>
 
       {/* BUTTON */}
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>Booking</Text>
-      </TouchableOpacity>
+      <View style={styles.section}>
+        <TouchableOpacity style={styles.bookBtn} onPress={handleBooking}>
+          <Text style={styles.bookText}>Book Appointment</Text>
+        </TouchableOpacity>
+      </View>
 
     </ScreenLayout>
   );
 }
 
-const SPACING = 14;
+const SPACING = 20;
 
 const styles = StyleSheet.create({
-
-  card: {
-    flexDirection: "row",
-    gap: 14,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    borderRadius: 20,
+  section: {
     marginBottom: SPACING,
-    backgroundColor: "#FFF",
   },
 
-  doctorImage: {
-    width: 85,
-    height: 85,
-    borderRadius: 16,
+  profileRow: {
+    flexDirection: "row",
+    gap: 16,
+  },
+
+  profileText: {
+    flex: 1,
+    justifyContent: "center",
+  },
+
+  image: {
+    width: 115,
+    height: 115,
+    borderRadius: 20,
   },
 
   name: {
@@ -172,92 +259,79 @@ const styles = StyleSheet.create({
     fontFamily: FONT.medium,
   },
 
-  section: {
-    marginBottom: SPACING,
-  },
-
-  title: {
-    fontSize: 18,
+  sectionTitle: {
+    fontSize: 16,
     fontFamily: FONT.title,
     color: "#0F172A",
-    marginBottom: 8,
+    marginBottom: 6,
   },
 
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
+  description: {
+    fontSize: 14,
+    color: "#64748B",
+    fontFamily: FONT.regular,
+    lineHeight: 20,
   },
 
-  iconCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: "#E2E8F0",
+  readMore: {
+    color: "#1F3A8A",
+    fontSize: 13,
+    fontFamily: FONT.medium,
+    marginTop: 4,
+  },
+
+  dateScroll: {
+    gap: 14,
+    paddingRight: 10,
+  },
+
+  dateBox: {
+    width: 60,
+    height: 80,
+    borderRadius: 16,
+    borderWidth: 1,
     justifyContent: "center",
     alignItems: "center",
   },
 
-  textWrap: {
-    flex: 1,
-    fontSize: 14,
-    color: "#64748B",
-    fontFamily: FONT.medium,
+  dayText: {
+    fontSize: 11,
+    fontFamily: FONT.regular,
+  },
+
+  dateText: {
+    fontSize: 20,
+    fontFamily: FONT.title,
   },
 
   divider: {
     height: 1,
     backgroundColor: "#E2E8F0",
-    marginBottom: SPACING,
   },
 
-  paymentRow: {
+  timeGrid: {
     flexDirection: "row",
+    flexWrap: "wrap",
     justifyContent: "space-between",
-    marginBottom: 6,
+    rowGap: 14,
   },
 
-  label: {
-    fontSize: 14,
-    color: "#94A3B8",
-    fontFamily: FONT.regular,
-  },
-
-  value: {
-    fontSize: 14,
-    color: "#0F172A",
-    fontFamily: FONT.regular,
-  },
-
-  totalLabel: {
-    fontSize: 14,
-    fontFamily: FONT.title,
-    color: "#0F172A",
-  },
-
-  totalValue: {
-    fontSize: 14,
-    fontFamily: FONT.title,
-    color: "#1F3A8A",
-  },
-
-  paymentBox: {
-    height: 54,
-    borderRadius: 15,
+  timeBox: {
+    width: "32%",
+    height: 48,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
     justifyContent: "center",
-    alignItems: "flex-start", // left aligned (industry)
-    paddingHorizontal: 14,
+    alignItems: "center",
   },
 
-  visa: {
-    width: 120,
-    height: 36,
+  timeText: {
+    fontSize: 13,
+    fontFamily: FONT.medium,
   },
 
-  button: {
-    height: 50,
+  bookBtn: {
+    height: 48,
     borderRadius: 25,
     backgroundColor: "#1F3A8A",
     justifyContent: "center",
@@ -265,8 +339,8 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
 
-  buttonText: {
-    color: "#FFF",
+  bookText: {
+    color: "#FFFFFF",
     fontSize: 14,
     fontFamily: FONT.title,
   },
