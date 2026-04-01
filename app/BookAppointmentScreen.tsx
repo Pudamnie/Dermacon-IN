@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams } from "expo-router";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import PageHeader from "../components/PageHeader";
 import ScreenLayout from "../components/ScreenLayout";
@@ -9,23 +10,29 @@ import visaImage from "../assets/images/visa.png";
 
 export default function BookAppointmentScreen() {
 
- 
-  const data = {
-    doctor: {
-      name: "Dr. Perara",
-      speciality: "Dermatologist",
-      rating: 4.7,
-      image: doctorImage,
-    },
-    booking: {
-      dateTime: " UPDATED DATE ",
-      reason: "Chwts",
-    },
-    payment: {
-      consultation: 1000,
-      admin: 100,
-      total: 1100,
-    },
+  //  RECEIVE DATA FROM DOCTOR SCREEN (INDUSTRY WAY)
+  const params = useLocalSearchParams();
+
+  // SAFE DATA STRUCTURE (FIREBASE READY)
+  const doctor = {
+    name: params.doctorName || "Dr. Perara",
+    speciality: params.speciality || "Dermatologist",
+    rating: params.rating || 4.7,
+    image: doctorImage,
+  };
+
+  const booking = {
+    dateTime:
+      params.date && params.time
+        ? `${params.date} - ${params.time}`
+        : "UPDATED DATE",
+    reason: "Melanoma", // 🔥 later from Firebase / user input
+  };
+
+  const payment = {
+    consultation: 1000,
+    admin: 100,
+    total: 1100,
   };
 
   return (
@@ -35,15 +42,15 @@ export default function BookAppointmentScreen() {
 
       {/* DOCTOR CARD */}
       <View style={styles.card}>
-        <Image source={data.doctor.image} style={styles.doctorImage} />
+        <Image source={doctor.image} style={styles.doctorImage} />
 
         <View style={{ flex: 1 }}>
-          <Text style={styles.name}>{data.doctor.name}</Text>
-          <Text style={styles.speciality}>{data.doctor.speciality}</Text>
+          <Text style={styles.name}>{doctor.name}</Text>
+          <Text style={styles.speciality}>{doctor.speciality}</Text>
 
           <View style={styles.ratingRow}>
             <Ionicons name="star" size={13} color="#1F3A8A" />
-            <Text style={styles.rating}>{data.doctor.rating}</Text>
+            <Text style={styles.rating}>{doctor.rating}</Text>
           </View>
         </View>
       </View>
@@ -57,7 +64,7 @@ export default function BookAppointmentScreen() {
             <Ionicons name="calendar-outline" size={18} color="#1F3A8A" />
           </View>
 
-          <Text style={styles.textWrap}>{data.booking.dateTime}</Text>
+          <Text style={styles.textWrap}>{booking.dateTime}</Text>
         </View>
       </View>
 
@@ -69,11 +76,10 @@ export default function BookAppointmentScreen() {
 
         <View style={styles.row}>
           <View style={styles.iconCircle}>
-            {/* ✅ Clean centered note icon */}
             <Ionicons name="create-outline" size={18} color="#1F3A8A" />
           </View>
 
-          <Text style={styles.textWrap}>{data.booking.reason}</Text>
+          <Text style={styles.textWrap}>{booking.reason}</Text>
         </View>
       </View>
 
@@ -85,17 +91,17 @@ export default function BookAppointmentScreen() {
 
         <View style={styles.paymentRow}>
           <Text style={styles.label}>Consultation</Text>
-          <Text style={styles.value}>Rs {data.payment.consultation}.00</Text>
+          <Text style={styles.value}>Rs {payment.consultation}.00</Text>
         </View>
 
         <View style={styles.paymentRow}>
           <Text style={styles.label}>Admin Fee</Text>
-          <Text style={styles.value}>Rs {data.payment.admin}.00</Text>
+          <Text style={styles.value}>Rs {payment.admin}.00</Text>
         </View>
 
         <View style={styles.paymentRow}>
           <Text style={styles.totalLabel}>Total</Text>
-          <Text style={styles.totalValue}>Rs {data.payment.total}.00</Text>
+          <Text style={styles.totalValue}>Rs {payment.total}.00</Text>
         </View>
       </View>
 
@@ -111,7 +117,18 @@ export default function BookAppointmentScreen() {
       </View>
 
       {/* BUTTON */}
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => {
+          // 🔥 FUTURE: Firebase booking save here
+          console.log("Booking confirmed", {
+            doctor,
+            booking,
+            payment,
+          });
+          alert("Booking Confirmed ✅");
+        }}
+      >
         <Text style={styles.buttonText}>Booking</Text>
       </TouchableOpacity>
 
@@ -241,7 +258,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E2E8F0",
     justifyContent: "center",
-    alignItems: "flex-start", // LEFT aligned
+    alignItems: "flex-start",
     paddingLeft: 14,
   },
 

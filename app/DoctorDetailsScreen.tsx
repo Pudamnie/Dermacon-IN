@@ -24,10 +24,10 @@ export default function DoctorDetailsScreen() {
   const [expanded, setExpanded] = useState(false);
 
   // Replace with Firebase data
-  
+
   const doctor = {
     id: "doc_1",
-    name: "Dr. Amanda Perera Silva Fernando With Very Long Name",
+    name: "Dr. Amanda Perera",
     speciality: "Dermatologist",
     rating: "4.7",
     description:
