@@ -17,82 +17,168 @@ import { COLORS, FONT } from "../../constants/theme";
 
 import doctorImage from "../../assets/images/consultDoctor.png";
 
+import {
+  getAppointmentStatus,
+  getChatState,
+  isJoinAvailable,
+  parseAppointmentDate,
+} from "../utils/ChatUtils";
+
+// ================= TYPES (🔥 FIX RED ERRORS) =================
+type Doctor = {
+  id: string;
+  name: string;
+  specialty: string;
+  rating: string;
+  image: any;
+};
+
+type Appointment = {
+  id: string;
+  name: string;
+  speciality: string;
+  date: string;
+  time: string;
+  image: any;
+};
+
 export default function ConsultScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
 
-  const [activeTab, setActiveTab] = useState("book");
-  const [newAppointment, setNewAppointment] = useState(null);
+  const [activeTab, setActiveTab] = useState<string>("book");
 
-  // ✅ FIREBASE READY STATES
+  const [topDoctors, setTopDoctors] = useState<Doctor[]>([]);
+  const [recentDoctors, setRecentDoctors] = useState<Doctor[]>([]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
 
-  const [topDoctors, setTopDoctors] = useState([
-    {
-      id: "1",
-      name: "Dr. Saman Perera",
-      specialty: "Dermatologist",
-      rating: "4.7",
-      image: doctorImage,
-    },
-    {
-      id: "2",
-      name: "Dr. Saman Perera",
-      specialty: "Dermatologist",
-      rating: "4.9",
-      image: doctorImage,
-    },
-    {
-      id: "3",
-      name: "Dr. Saman Perera",
-      specialty: "Dermatologist",
-      rating: "4.8",
-      image: doctorImage,
-    },
-  ]);
+  // ================= MOCK DATA =================
+  useEffect(() => {
+    setTopDoctors([
+      {
+        id: "1",
+        name: "Dr. Saman Perera",
+        specialty: "Dermatologist",
+        rating: "4.7",
+        image: doctorImage,
+      },
+    ]);
 
-  const [recentDoctors, setRecentDoctors] = useState([
-    {
-      id: "r1",
-      name: "Dr. Amanda Perera",
-      specialty: "Dermatologist",
-      rating: "4.8",
-      image: doctorImage,
-      lastVisited: "2026-03-28",
-    },
-    {
-      id: "r2",
-      name: "Dr. Kumarathunga",
-      specialty: "Dermatologist",
-      rating: "4.6",
-      image: doctorImage,
-      lastVisited: "2026-03-25",
-    },
-  ]);
+    setRecentDoctors([
+      {
+        id: "r1",
+        name: "Dr. Amanda Perera",
+        specialty: "Dermatologist",
+        rating: "4.8",
+        image: doctorImage,
+      },
+    ]);
 
-  // ✅ SORT RECENT (LATEST FIRST)
-  const sortedRecentDoctors = [...recentDoctors].sort(
-    (a, b) => new Date(b.lastVisited) - new Date(a.lastVisited)
+    const now = new Date();
+
+    // ✅ SAFE FORMAT FUNCTION
+    const formatTime = (date: Date): string => {
+      let hours = date.getHours();
+      const minutes = date.getMinutes();
+
+      const ampm = hours >= 12 ? "PM" : "AM";
+      hours = hours % 12;
+      hours = hours ? hours : 12;
+
+      const mins = minutes < 10 ? "0" + minutes : minutes;
+
+      return `${hours}:${mins} ${ampm}`;
+    };
+
+    // 🔥 MOCK DATA (REPLACE WITH FIREBASE LATER)
+    setAppointments([
+      {
+        //future (confiremed) doctor 
+
+        id: "1",
+        name: "Dr. Saman",
+        speciality: "Dermatologist",
+        date: now.toLocaleDateString("en-GB"),
+        time: formatTime(new Date(now.getTime() + 60 * 60 * 1000)),
+        image: doctorImage,
+      },
+
+
+      {
+        //ongoing appointment 
+
+        id: "2",
+        name: "Dr. Perera",
+        speciality: "Dermatologist",
+        date: now.toLocaleDateString("en-GB"),
+        time: formatTime(now),
+        image: doctorImage,
+      },
+
+
+      {
+
+        // completed 20 min after
+
+        id: "3",
+        name: "Dr. Amanda",
+        speciality: "Dermatologist",
+        date: now.toLocaleDateString("en-GB"),
+        time: formatTime(new Date(now.getTime() - 20 * 60 * 1000)),
+        image: doctorImage,
+      },
+
+
+      {
+        //olpleted 2 days ago
+
+        id: "4",
+        name: "Dr. Perera",
+        speciality: "Dermatologist",
+        date: new Date(
+          now.getTime() - 2 * 24 * 60 * 60 * 1000
+        ).toLocaleDateString("en-GB"),
+        time: formatTime(now),
+        image: doctorImage,
+      },
+    ]);
+  }, []);
+
+
+
+  // ================= SORTING =================
+  const sortedAppointments = [...appointments].sort(
+    (a: Appointment, b: Appointment) => {
+      const timeA = parseAppointmentDate(a).getTime();
+      const timeB = parseAppointmentDate(b).getTime();
+
+      const statusOrder: Record<string, number> = {
+        ongoing: 1,
+        confirmed: 2,
+        completed: 3,
+      };
+
+      const sA = getAppointmentStatus(a);
+      const sB = getAppointmentStatus(b);
+
+      if (statusOrder[sA] !== statusOrder[sB]) {
+        return statusOrder[sA] - statusOrder[sB];
+      }
+
+      if (sA === "confirmed") return timeA - timeB;
+
+      return timeB - timeA;
+    }
   );
 
-  // ✅ HANDLE NAVIGATION PARAMS
+  // ================= NAVIGATION =================
   useEffect(() => {
-    if (params.tab === "scheduled" && activeTab !== "scheduled") {
+    if (params.tab === "scheduled") {
       setActiveTab("scheduled");
-
-      if (params.name) {
-        setNewAppointment({
-          name: params.name,
-          speciality: params.speciality,
-          date: params.date,
-          time: params.time,
-          status: params.status || "confirmed",
-          image: doctorImage,
-        });
-      }
     }
   }, [params.tab]);
 
-  // ✅ BACK HANDLER FIX
+  // ================= BACK FIX =================
   useFocusEffect(
     useCallback(() => {
       const onBackPress = () => {
@@ -103,12 +189,11 @@ export default function ConsultScreen() {
         return false;
       };
 
-      const subscription = BackHandler.addEventListener(
+      const sub = BackHandler.addEventListener(
         "hardwareBackPress",
         onBackPress
       );
-
-      return () => subscription.remove();
+      return () => sub.remove();
     }, [activeTab])
   );
 
@@ -119,117 +204,100 @@ export default function ConsultScreen() {
       {/* TOGGLE */}
       <View style={styles.toggleContainer}>
         <TouchableOpacity
-          style={activeTab === "book" ? styles.activeTab : styles.inactiveTab}
+          style={
+            activeTab === "book" ? styles.activeTab : styles.inactiveTab
+          }
           onPress={() => setActiveTab("book")}
         >
-          <Text style={activeTab === "book" ? styles.activeText : styles.inactiveText}>
+          <Text
+            style={
+              activeTab === "book"
+                ? styles.activeText
+                : styles.inactiveText
+            }
+          >
             Book Appointment
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={activeTab === "scheduled" ? styles.activeTab : styles.inactiveTab}
+          style={
+            activeTab === "scheduled"
+              ? styles.activeTab
+              : styles.inactiveTab
+          }
           onPress={() => setActiveTab("scheduled")}
         >
-          <Text style={activeTab === "scheduled" ? styles.activeText : styles.inactiveText}>
+          <Text
+            style={
+              activeTab === "scheduled"
+                ? styles.activeText
+                : styles.inactiveText
+            }
+          >
             Scheduled
           </Text>
         </TouchableOpacity>
       </View>
 
-      {activeTab === "book" ? (
+      {/* BOOK TAB */}
+      {activeTab === "book" && (
         <>
-          {/* SEARCH */}
           <View style={styles.searchBox}>
             <Text style={styles.searchText}>Find a doctor</Text>
           </View>
 
-          {/* TOP DOCTORS */}
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Top Doctors</Text>
-
-            <TouchableOpacity onPress={() => router.push("/TopDoctorsScreen")}>
-              <Text style={styles.seeAll}>See all</Text>
-            </TouchableOpacity>
-          </View>
+          <Text style={styles.sectionTitle}>Top Doctors</Text>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View style={styles.row}>
               {topDoctors.map((doc) => (
-                <TouchableOpacity
-                  key={doc.id}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/DoctorDetailsScreen",
-                      params: {
-                        doctorName: doc.name,
-                        speciality: doc.specialty,
-                        rating: doc.rating,
-                      },
-                    })
-                  }
-                >
-                  <DoctorCard doctor={doc} />
-                </TouchableOpacity>
+                <DoctorCard key={doc.id} doctor={doc} />
               ))}
             </View>
           </ScrollView>
 
-          {/* RECENT DOCTORS */}
           <Text style={styles.sectionTitle}>Your Recent Doctors</Text>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View style={styles.row}>
-              {sortedRecentDoctors.length > 0 ? (
-                sortedRecentDoctors.map((doc) => (
-                  <TouchableOpacity
-                    key={doc.id}
-                    onPress={() =>
-                      router.push({
-                        pathname: "/DoctorDetailsScreen",
-                        params: {
-                          doctorName: doc.name,
-                          speciality: doc.specialty,
-                          rating: doc.rating,
-                        },
-                      })
-                    }
-                  >
-                    <DoctorCard doctor={doc} />
-                  </TouchableOpacity>
-                ))
-              ) : (
-                <Text style={{ color: "#94A3B8", fontFamily: FONT.medium }}>
-                  No recent doctors yet
-                </Text>
-              )}
+              {recentDoctors.map((doc) => (
+                <DoctorCard key={doc.id} doctor={doc} />
+              ))}
             </View>
           </ScrollView>
         </>
-      ) : (
-        <>
-          {/* NEW BOOKED */}
-          {newAppointment && (
-            <ScheduledCard appointment={newAppointment} />
-          )}
-
-          {/* STATIC FALLBACK */}
-          <ScheduledCard
-            appointment={{
-              name: "Dr. Amanda Perera",
-              speciality: "Dermatologist",
-              date: "26/06/2026",
-              time: "10:30 AM",
-              status: "confirmed",
-              image: doctorImage,
-            }}
-          />
-        </>
       )}
+
+      {/* SCHEDULED TAB */}
+      {activeTab === "scheduled" &&
+        sortedAppointments.map((item) => {
+          const chatState = getChatState(item);
+          const joinActive = isJoinAvailable(item);
+
+          return (
+            <ScheduledCard
+              key={item.id}
+              appointment={item}
+              chatState={chatState}
+              isJoinActive={joinActive}
+              onChatPress={() =>
+                router.push({
+                  pathname: "/ChatScreen",
+                  params: {
+                    name: item.name,
+                    chatState: chatState,
+                  },
+                })
+              }
+            />
+          );
+        })}
     </ScreenLayout>
   );
 }
 
+// ================= STYLES =================
 const styles = StyleSheet.create({
   toggleContainer: {
     flexDirection: "row",
@@ -238,7 +306,6 @@ const styles = StyleSheet.create({
     padding: 4,
     marginBottom: 16,
   },
-
   activeTab: {
     flex: 1,
     backgroundColor: "#1F3A8A",
@@ -246,64 +313,37 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     alignItems: "center",
   },
-
   inactiveTab: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
   },
-
   activeText: {
-    color: "#FFFFFF",
+    color: "#FFF",
     fontFamily: FONT.title,
-    fontSize: 14,
   },
-
   inactiveText: {
     color: "#64748B",
     fontFamily: FONT.title,
-    fontSize: 14,
   },
-
   searchBox: {
     borderRadius: 25,
     borderWidth: 1,
     borderColor: "#E2E8F0",
-    backgroundColor: "#F8FAFC",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    padding: 12,
     marginBottom: 20,
   },
-
   searchText: {
-    fontSize: 12,
     color: "#94A3B8",
-    fontFamily: FONT.regular,
   },
-
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 12,
-  },
-
   sectionTitle: {
     fontSize: 16,
     fontFamily: FONT.title,
     color: COLORS.textPrimary,
-    marginBottom: 12,
   },
-
-  seeAll: {
-    fontSize: 13,
-    color: COLORS.primary,
-    fontFamily: FONT.medium,
-  },
-
   row: {
     flexDirection: "row",
     gap: 16,
-    marginBottom: 24,
-    alignItems: "center",
+    marginBottom: 20,
   },
 });

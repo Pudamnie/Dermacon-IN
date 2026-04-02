@@ -1,40 +1,54 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { getAppointmentStatus } from "../app/utils/ChatUtils";
 import { FONT } from "../constants/theme";
 
-export default function ScheduledCard({ appointment }) {
-  const { status } = appointment;
+export default function ScheduledCard({
+  appointment,
+  chatState,
+  isJoinActive,
+  onChatPress,
+}) {
+  // ================= STATUS =================
+  const status = getAppointmentStatus(appointment);
 
-  const isOngoing = status === "ongoing";
-  const isCompleted = status === "completed";
+  // DEBUG (REMOVE LATER)
+  console.log("STATUS:", status);
+  console.log("TIME:", appointment.time);
+  console.log("DATE:", appointment.date);
 
-  // STATUS COLORS
-  const getDotColor = () => {
-    if (status === "confirmed") return "#7BEB78";
-    if (status === "ongoing") return "#F59E0B";
-    return "#94A3B8";
+  // ================= CHAT =================
+  const isChatEnabled = chatState === "active" || chatState === "readonly";
+  const isChatReadOnly = chatState === "readonly";
+
+  // ================= STATUS UI =================
+  const getStatusUI = () => {
+    switch (status) {
+      case "confirmed":
+        return { color: "#7BEB78", label: "confirmed" };
+
+      case "ongoing":
+        return { color: "#F59E0B", label: "ongoing" };
+
+      case "completed":
+        return { color: "#93A3B8", label: "completed" };
+
+      default:
+        return { color: "#93A3B8", label: "completed" };
+    }
   };
+
+  const statusUI = getStatusUI();
 
   return (
     <View style={styles.card}>
-
       {/* TOP */}
       <View style={styles.topRow}>
-
-        {/* TEXT AREA (FIXED RESPONSIVE) */}
         <View style={styles.textContainer}>
-          <Text
-            style={styles.name}
-            numberOfLines={2}
-            ellipsizeMode="tail"
-          >
+          <Text style={styles.name} numberOfLines={2}>
             {appointment.name}
           </Text>
-
-          <Text
-            style={styles.speciality}
-            numberOfLines={1}
-          >
+          <Text style={styles.speciality}>
             {appointment.speciality}
           </Text>
         </View>
@@ -42,9 +56,8 @@ export default function ScheduledCard({ appointment }) {
         <Image source={appointment.image} style={styles.image} />
       </View>
 
-      {/* DATE TIME + STATUS */}
+      {/* INFO */}
       <View style={styles.infoRow}>
-
         <View style={styles.rowItem}>
           <Ionicons name="calendar-outline" size={15} color="#64748B" />
           <Text style={styles.infoText}>{appointment.date}</Text>
@@ -56,53 +69,50 @@ export default function ScheduledCard({ appointment }) {
         </View>
 
         <View style={styles.rowItem}>
-          <View style={[styles.dot, { backgroundColor: getDotColor() }]} />
-          <Text style={styles.infoText}>{status}</Text>
+          <View style={[styles.dot, { backgroundColor: statusUI.color }]} />
+          <Text style={styles.infoText}>{statusUI.label}</Text>
         </View>
-
       </View>
 
       {/* BUTTONS */}
       <View style={styles.buttonRow}>
-
         {/* CHAT */}
         <TouchableOpacity
           style={[
             styles.button,
             {
-              borderColor:
-                isOngoing || isCompleted ? "#1F3A8A" : "#E2E8F0",
+              borderColor: isChatEnabled ? "#1E3A8A" : "#E2E8F0",
               backgroundColor: "#FFFFFF",
             },
           ]}
-          disabled={!isOngoing && !isCompleted}
+          disabled={!isChatEnabled}
+          onPress={onChatPress}
         >
           <Text
             style={{
-              color:
-                isOngoing || isCompleted ? "#1F3A8A" : "#E2E8F0",
+              color: isChatEnabled ? "#1E3A8A" : "#E2E8F0",
               fontFamily: FONT.regular,
               fontSize: 14,
             }}
           >
-            Chat
+            {isChatReadOnly ? "View Chat" : "Chat"}
           </Text>
         </TouchableOpacity>
 
-        {/* JOIN NOW */}
+        {/* JOIN */}
         <TouchableOpacity
           style={[
             styles.button,
             {
-              backgroundColor: isOngoing ? "#1F3A8A" : "#FFFFFF",
-              borderColor: isOngoing ? "#1F3A8A" : "#E2E8F0",
+              backgroundColor: isJoinActive ? "#1E3A8A" : "#FFFFFF",
+              borderColor: isJoinActive ? "#1E3A8A" : "#E2E8F0",
             },
           ]}
-          disabled={!isOngoing}
+          disabled={!isJoinActive}
         >
           <Text
             style={{
-              color: isOngoing ? "#FFFFFF" : "#E2E8F0",
+              color: isJoinActive ? "#FFFFFF" : "#E2E8F0",
               fontFamily: FONT.regular,
               fontSize: 14,
             }}
@@ -110,13 +120,12 @@ export default function ScheduledCard({ appointment }) {
             Join Now
           </Text>
         </TouchableOpacity>
-
       </View>
-
     </View>
   );
 }
 
+// ================= STYLES =================
 const styles = StyleSheet.create({
   card: {
     width: "100%",
@@ -128,70 +137,56 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 16,
   },
-
   topRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-start",
   },
-
   textContainer: {
-    flex: 1,                // text  shrink
-    paddingRight: 10,       //prevents overlap with image
+    flex: 1,
+    paddingRight: 10,
   },
-
   name: {
     fontSize: 18,
     fontFamily: FONT.title,
     color: "#0F172A",
-    flexShrink: 1,          // critical for long text
   },
-
   speciality: {
     fontSize: 12,
     fontFamily: FONT.medium,
     color: "#94A3B8",
     marginTop: 2,
   },
-
   image: {
     width: 46,
     height: 46,
     borderRadius: 23,
   },
-
   infoRow: {
     flexDirection: "row",
-    alignItems: "center",
     marginTop: 14,
     gap: 14,
-    flexWrap: "wrap", // prevents overflow on small screens
+    flexWrap: "wrap",
   },
-
   rowItem: {
     flexDirection: "row",
-    alignItems: "center",
     gap: 6,
+    alignItems: "center",
   },
-
   infoText: {
     fontSize: 12,
     fontFamily: FONT.medium,
     color: "#64748B",
   },
-
   dot: {
     width: 6,
     height: 6,
     borderRadius: 3,
   },
-
   buttonRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: 18,
   },
-
   button: {
     width: 145,
     height: 46,
