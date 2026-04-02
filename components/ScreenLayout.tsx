@@ -11,9 +11,9 @@ export default function ScreenLayout({
   children,
   scroll = true,
 }: ScreenLayoutProps) {
-  if (scroll) {
-    return (
-      <View style={styles.screen}>
+  return (
+    <View style={styles.screen}>
+      {scroll ? (
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={styles.container}
@@ -22,13 +22,9 @@ export default function ScreenLayout({
         >
           {children}
         </ScrollView>
-      </View>
-    );
-  }
-
-  return (
-    <View style={styles.screen}>
-      <View style={styles.container}>{children}</View>
+      ) : (
+        <View style={styles.noScrollContainer}>{children}</View>
+      )}
     </View>
   );
 }
@@ -40,10 +36,18 @@ const styles = StyleSheet.create({
     paddingTop: StatusBar.currentHeight || 20,
   },
 
+  //  For ScrollView screens
   container: {
-    flexGrow: 1, // 🔥 VERY IMPORTANT (fix overflow)
+    flexGrow: 1,
     paddingHorizontal: SPACING.screenHorizontal,
     paddingTop: 12,
-    paddingBottom: 40, // 🔥 prevents button hiding
+    paddingBottom: 40,
+  },
+
+  // For FlatList / chat / full control screens
+  noScrollContainer: {
+    flex: 1,
+    paddingHorizontal: SPACING.screenHorizontal,
+    paddingTop: 12,
   },
 });

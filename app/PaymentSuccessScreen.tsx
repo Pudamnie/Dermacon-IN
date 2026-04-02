@@ -16,11 +16,12 @@ export default function PaymentSuccessScreen() {
         index: 0,
         routes: [
           {
+            
             name: "(tabs)", // root tab navigator
             state: {
               routes: [
                 {
-                  name: "ConsultScreen", // ⚠️ MUST match your tab file name (lowercase)
+                  name: "ConsultScreen", // MUST match your tab file name (lowercase)
                   params: {
                     tab: "scheduled",
 

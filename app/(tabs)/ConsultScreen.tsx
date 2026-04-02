@@ -24,7 +24,7 @@ import {
   parseAppointmentDate,
 } from "../utils/ChatUtils";
 
-// ================= TYPES (🔥 FIX RED ERRORS) =================
+// ================= TYPES  =================
 type Doctor = {
   id: string;
   name: string;
@@ -76,7 +76,7 @@ export default function ConsultScreen() {
 
     const now = new Date();
 
-    // ✅ SAFE FORMAT FUNCTION
+    // SAFE FORMAT FUNCTION
     const formatTime = (date: Date): string => {
       let hours = date.getHours();
       const minutes = date.getMinutes();
@@ -90,7 +90,7 @@ export default function ConsultScreen() {
       return `${hours}:${mins} ${ampm}`;
     };
 
-    // 🔥 MOCK DATA (REPLACE WITH FIREBASE LATER)
+    //  MOCK DATA (REPLACE WITH FIREBASE LATER)
     setAppointments([
       {
         //future (confiremed) doctor 
