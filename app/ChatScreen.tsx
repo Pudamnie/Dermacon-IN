@@ -1,5 +1,3 @@
-
-
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -21,13 +19,11 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as DocumentPicker from "expo-document-picker";
+import * as FileSystem from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
+import * as IntentLauncher from "expo-intent-launcher";
 import * as Sharing from "expo-sharing";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-
-import * as IntentLauncher from "expo-intent-launcher";
-
 
 import MessageBubble from "../components/MessageBubble";
 import ScreenLayout from "../components/ScreenLayout";
@@ -48,9 +44,9 @@ export default function ChatScreen() {
   const [caption, setCaption] = useState("");
   const [previewVisible, setPreviewVisible] = useState(false);
 
+  const [attachVisible, setAttachVisible] = useState(false);
 
-
-  //  KEYBOARD
+  // 🔥 KEYBOARD
   useEffect(() => {
     const show = Keyboard.addListener("keyboardDidShow", () =>
       setKeyboardVisible(true)
@@ -65,9 +61,7 @@ export default function ChatScreen() {
     };
   }, []);
 
-
-
-  //  LOAD
+  // 🔥 LOAD
   useEffect(() => {
     const load = async () => {
       const saved = await AsyncStorage.getItem("chat_" + doctor.name);
@@ -82,35 +76,35 @@ export default function ChatScreen() {
     load();
   }, []);
 
-
-
-  //  SAVE
+  // 🔥 SAVE
   useEffect(() => {
     AsyncStorage.setItem("chat_" + doctor.name, JSON.stringify(messages));
   }, [messages]);
 
-
-
-  //  AUTO SCROLL
+  // 🔥 AUTO SCROLL
   useEffect(() => {
     setTimeout(() => {
       flatListRef.current?.scrollToEnd({ animated: true });
     }, 50);
   }, [messages, keyboardVisible]);
 
-
-
-
-  //  BACK BUTTON (FIXED)
+  // 🔥 BACK BUTTON
   useEffect(() => {
     const backAction = () => {
       if (previewVisible) {
         setPreviewVisible(false);
         return true;
       }
+
+      if (attachVisible) {
+        setAttachVisible(false);
+        return true;
+      }
+
       router.back();
       return true;
     };
+
 
     const sub = BackHandler.addEventListener(
       "hardwareBackPress",
@@ -118,13 +112,13 @@ export default function ChatScreen() {
     );
 
     return () => sub.remove();
-  }, [previewVisible]);
+  }, [previewVisible, attachVisible]);
 
+  
 
-
-  // SEND TEXT
+  // 🔥 SEND TEXT
   const handleSend = () => {
-    if (!input.trim()) return;
+    if (!input.trim() || params.chatState === "readonly") return;
 
     setMessages((prev) => [
       ...prev,
@@ -145,11 +139,9 @@ export default function ChatScreen() {
     }, 1000);
   };
 
-
-
-  //  SEND FILE
+  // 🔥 SEND FILE
   const handleSendFile = () => {
-    if (!selectedFile) return;
+    if (!selectedFile || params.chatState === "readonly") return;
 
     setMessages((prev) => [
       ...prev,
@@ -166,45 +158,34 @@ export default function ChatScreen() {
     setPreviewVisible(false);
   };
 
-  // ONLY CAMERA PART IMPROVED — REST UNCHANGED
+  // 🔥 CAMERA
+  const openCamera = async () => {
+    Keyboard.dismiss();
 
-const openCamera = async () => {
-  Keyboard.dismiss();
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert("Camera permission required");
+      return;
+    }
 
-  const permission = await ImagePicker.requestCameraPermissionsAsync();
-  if (!permission.granted) {
-    Alert.alert("Camera permission required");
-    return;
-  }
-
-  const res = await ImagePicker.launchCameraAsync({
-    quality: 0.3,            // faster processing
-    exif: false,             //  remove metadata delay
-    base64: false,
-    allowsEditing: false,
-    skipProcessing: true as any // Android boost
-  });
-
-  if (!res.canceled && res.assets?.length > 0) {
-    const file = {
-      uri: res.assets[0].uri,
-      type: "image",
-    };
-
-    
-    setPreviewVisible(true);
-    setSelectedFile(null);
-
-    requestAnimationFrame(() => {
-      setSelectedFile(file);
+    const res = await ImagePicker.launchCameraAsync({
+      quality: 0.3,
+      exif: false,
+      base64: false,
+      allowsEditing: false,
+      skipProcessing: true as any,
     });
-  }
-};
 
+    if (!res.canceled && res.assets?.length > 0) {
+      setSelectedFile({
+        uri: res.assets[0].uri,
+        type: "image",
+      });
+      setPreviewVisible(true);
+    }
+  };
 
-
-
-  // GALLERY
+  // 🔥 GALLERY
   const openGallery = async () => {
     Keyboard.dismiss();
 
@@ -219,20 +200,15 @@ const openCamera = async () => {
     });
 
     if (!res.canceled && res.assets?.length > 0) {
-      const file = {
+      setSelectedFile({
         uri: res.assets[0].uri,
         type: "image",
-      };
-
-      setSelectedFile(file);
+      });
       setPreviewVisible(true);
     }
   };
 
-
-
-
-  //  DOCUMENT
+  // 🔥 DOCUMENT
   const openDocument = async () => {
     Keyboard.dismiss();
 
@@ -246,7 +222,7 @@ const openCamera = async () => {
       setSelectedFile({
         uri: file.uri,
         name: file.name,
-        mimeType: file.mimeType || "",
+        mimeType: file.mimeType || "*/*",
         type: "document",
       });
 
@@ -254,51 +230,43 @@ const openCamera = async () => {
     }
   };
 
+  // 🔥 FILE OPEN
+  const openFile = async (file: any) => {
+    try {
+      if (!file?.uri) return;
 
-
-  const openAttachmentMenu = () => {
-    Alert.alert("Attach", "", [
-      { text: "Camera", onPress: openCamera },
-      { text: "Gallery", onPress: openGallery },
-      { text: "Document", onPress: openDocument },
-      { text: "Cancel", style: "cancel" },
-    ]);
-  };
-
-
-
-//openfile
-const openFile = async (file: any) => {
-  try {
-    if (!file?.uri) return;
-
-    if (Platform.OS === "android") {
-      //  Android → Open with viewer apps (like WhatsApp)
-      await IntentLauncher.startActivityAsync("android.intent.action.VIEW", {
-        data: file.uri,
-        flags: 1,
-        type: file.mimeType || "*/*",
-      });
-    } else {
-
-      
-   // Best possible (system preview/share)
-      const available = await Sharing.isAvailableAsync();
-
-      if (available) {
-        await Sharing.shareAsync(file.uri);
-      } else {
-        Alert.alert("No app available to open this file");
+      if (file.type === "image" || file.mimeType?.startsWith("image/")) {
+        setSelectedFile(file);
+        setPreviewVisible(true);
+        return;
       }
+
+      if (Platform.OS === "android") {
+        const contentUri = await FileSystem.getContentUriAsync(file.uri);
+
+        await IntentLauncher.startActivityAsync(
+          "android.intent.action.VIEW",
+          {
+            data: contentUri,
+            flags: 1,
+            type: file.mimeType || "*/*",
+          }
+        );
+      } else {
+        await Sharing.shareAsync(file.uri);
+      }
+    } catch {
+      Alert.alert("Cannot open file");
     }
-  } catch (e) {
-    Alert.alert("Cannot open file");
-  }
-};
+  };
 
   return (
     <ScreenLayout scroll={false}>
-      <View style={{ flex: 1 }}>
+      <TouchableOpacity
+        activeOpacity={1}
+        style={{ flex: 1 }}
+        onPress={() => setAttachVisible(false)}
+      >
         {/* HEADER */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
@@ -331,79 +299,110 @@ const openFile = async (file: any) => {
             showsVerticalScrollIndicator={false}
           />
 
-          <View
-            style={[
-              styles.inputContainer,
-              {
-                paddingBottom: Math.max(insets.bottom - 6, 2),
-              },
-            ]}
-          >
-            <TouchableOpacity onPress={openAttachmentMenu}>
-              <Ionicons name="attach" size={24} color="#64748B" />
-            </TouchableOpacity>
+          {/* 🔥 INPUT */}
+          {params.chatState === "readonly" ? (
+            <View style={styles.disabledContainer}>
+              <Text style={styles.disabledText}>
+                Chat unavailable after 48 hours
+              </Text>
+            </View>
+          ) : (
+            <View
+  style={[
+    styles.inputContainer,
+    {
+      paddingBottom: Math.max(insets.bottom, 10), // 🔥 FIX
+    },
+  ]}
+>
+              <TouchableOpacity onPress={() => setAttachVisible(!attachVisible)}>
+                <Ionicons name="attach" size={24} color="#64748B" />
+              </TouchableOpacity>
 
-            <TextInput
-              value={input}
-              onChangeText={setInput}
-              placeholder="Message"
-              style={styles.inputBox}
-              multiline
-            />
-
-            <TouchableOpacity onPress={handleSend} style={styles.sendButton}>
-              <Ionicons name="send" size={18} color="#fff" />
-            </TouchableOpacity>
-          </View>
-        </KeyboardAvoidingView>
-
-
-
-        {/* REVIEW MODAL (FIXED BACK BUTTON) */}
-        <Modal
-          visible={previewVisible}
-          animationType="slide"
-          onRequestClose={() => setPreviewVisible(false)} 
-        >
-          <View style={{ flex: 1, backgroundColor: "#000" }}>
-            <TouchableOpacity
-              style={{ padding: 20 }}
-              onPress={() => setPreviewVisible(false)}
-            >
-              <Ionicons name="close" size={28} color="#fff" />
-            </TouchableOpacity>
-
-            {selectedFile?.type === "image" ? (
-              <Image
-                source={{ uri: selectedFile.uri }}
-                style={{ flex: 1 }}
-                resizeMode="contain"
-              />
-            ) : (
-              <View style={styles.docPreview}>
-                <Ionicons name="document" size={60} color="#fff" />
-                <Text style={{ color: "#fff", marginTop: 10 }}>
-                  {selectedFile?.name}
-                </Text>
-              </View>
-            )}
-
-            <View style={styles.previewInput}>
               <TextInput
-                placeholder="Add a caption..."
-                placeholderTextColor="#ccc"
-                value={caption}
-                onChangeText={setCaption}
-                style={{ flex: 1, color: "#fff" }}
+                value={input}
+                onChangeText={setInput}
+                placeholder="Message"
+                style={styles.inputBox}
+                multiline
               />
 
-              <TouchableOpacity onPress={handleSendFile}>
-                <Ionicons name="send" size={26} color="#fff" />
+              <TouchableOpacity onPress={handleSend} style={styles.sendButton}>
+                <Ionicons name="send" size={18} color="#fff" />
               </TouchableOpacity>
             </View>
+          )}
+        </KeyboardAvoidingView>
+
+        {/* 🔥 FLOATING ATTACH MENU */}
+        {attachVisible && (
+          <View style={styles.floatingAttach}>
+            <TouchableOpacity style={styles.floatItem} onPress={openCamera}>
+              <Ionicons name="camera" size={24} color="#1F3A8A" />
+              <Text style={styles.floatText}>Camera</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.floatItem} onPress={openGallery}>
+              <Ionicons name="image" size={24} color="#1F3A8A" />
+              <Text style={styles.floatText}>Gallery</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.floatItem} onPress={openDocument}>
+              <Ionicons name="document" size={24} color="#1F3A8A" />
+              <Text style={styles.floatText}>Document</Text>
+            </TouchableOpacity>
           </View>
+        )}
+
+        {/* 🔥 PREVIEW */}
+        <Modal visible={previewVisible} animationType="slide">
+
+
+          <View style={{ flex: 1, backgroundColor: "#000" }}>
+  
+  {/* CLOSE */}
+  <TouchableOpacity
+    style={{ padding: 20 }}
+    onPress={() => setPreviewVisible(false)}
+  >
+    <Ionicons name="close" size={28} color="#fff" />
+  </TouchableOpacity>
+
+  {/* IMAGE PREVIEW */}
+  {selectedFile?.type === "image" ? (
+    <Image
+      source={{ uri: selectedFile.uri }}
+      style={{ flex: 1 }}
+      resizeMode="contain"
+    />
+  ) : (
+    <View style={styles.docPreview}>
+      <Ionicons name="document" size={60} color="#fff" />
+      <Text style={{ color: "#fff", marginTop: 10 }}>
+        {selectedFile?.name}
+      </Text>
+    </View>
+  )}
+
+  {/* 🔥 CAPTION + SEND */}
+  <View style={styles.previewInput}>
+    <TextInput
+      placeholder="Add a caption..."
+      placeholderTextColor="#ccc"
+      value={caption}
+      onChangeText={setCaption}
+      style={styles.captionInput}
+    />
+
+    <TouchableOpacity onPress={handleSendFile}>
+      <Ionicons name="send" size={26} color="#fff" />
+    </TouchableOpacity>
+  </View>
+
+        </View>
+
         </Modal>
-      </View>
+      </TouchableOpacity>
     </ScreenLayout>
   );
 }
@@ -462,10 +461,54 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  previewInput: {
+  disabledContainer: {
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    borderRadius: 25,
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  disabledText: {
+    fontSize: 14,
+    color: "#E2E8F0",
+  },
+
+  floatingAttach: {
+    position: "absolute",
+    bottom: 80,
+    left: 20,
+    backgroundColor: "#fff",
+    borderRadius: 18,
+    paddingVertical: 20,
+    paddingHorizontal: 30,
+    elevation: 6,
+  },
+
+  floatItem: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 14,
-    backgroundColor: "#111",
+    paddingVertical: 10,
   },
+
+  floatText: {
+    marginLeft: 10,
+    fontSize: 14,
+    color: "#0F172A",
+  },
+
+  previewInput: {
+  flexDirection: "row",
+  alignItems: "center",
+  padding: 14,
+  backgroundColor: "#111",
+},
+
+captionInput: {
+  flex: 1,
+  color: "#fff",
+  fontSize: 14,
+},
 });
