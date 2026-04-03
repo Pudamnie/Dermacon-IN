@@ -129,10 +129,11 @@ export default function ConsultScreen() {
       },
 
 
-      {
-        //olpleted 2 days ago
 
-        id: "4",
+      {
+        //colpleted 2 days ago
+
+        id: "5",
         name: "Dr. Perera",
         speciality: "Dermatologist",
         date: new Date(

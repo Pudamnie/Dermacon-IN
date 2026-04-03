@@ -1,3 +1,4 @@
+import { FONT } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
@@ -60,8 +61,14 @@ export default function MessageBubble({ message, onOpenFile }) {
 
       {/* TEXT */}
       {message.text && (
-        <Text style={{ color: isUser ? "#fff" : "#333", marginTop: 4 }}>
-          {message.text}
+        <Text style={{ 
+          color: isUser ? "#ffffff" : "#64748B", 
+          marginTop: 4,
+          fontSize: 14,
+          lineHeight: 20,
+          fontFamily: FONT.regular }}>
+            
+        {message.text}
         </Text>
       )}
     </View>

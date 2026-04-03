@@ -16,6 +16,7 @@ export default function ScheduledCard({
   console.log("STATUS:", status);
   console.log("TIME:", appointment.time);
   console.log("DATE:", appointment.date);
+  console.log("CHAT STATE:", chatState);
 
   // ================= CHAT =================
   const isChatEnabled = chatState === "active" || chatState === "readonly";
