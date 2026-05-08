@@ -1,50 +1,79 @@
-# Welcome to your Expo app 👋
+# SkinCare AI Platform
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A full-stack AI-powered mobile healthcare application.
 
-## Get started
+## 🚀 Technologies
 
-1. Install dependencies
+- **Backend**: FastAPI (Python), MongoDB Atlas, TensorFlow (.h5), Grad-CAM, JWT
+- **Frontend**: Expo (React Native), React Navigation, Axios, Context API
+- **Design Theme**: Modern Blue and Green theme with clean styling
 
-   ```bash
-   npm install
-   ```
+## ⚙️ Features
 
-2. Start the app
+1. **Role-Based Authentication**: Separate experiences for Patient, Doctor, and Pharmacy.
+2. **AI Skin Analysis**: Upload image, predict using a TensorFlow model, and visualize using Grad-CAM.
+3. **Medical Feedback**: Doctors can review reports and provide feedback.
+4. **AI Chatbot**: Intelligent medical assistant for patients.
+5. **Pharmacy Store**: Browse products and place/track orders.
 
-   ```bash
-   npx expo start
-   ```
+## 🛠️ Setup Instructions
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+### 1. Backend Setup
 
 ```bash
-npm run reset-project
+cd backend
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+Swagger UI available at: `http://localhost:8000/docs`
+
+### 2. Frontend Setup (Mobile App)
+
+```bash
+cd mobile
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Configure `mobile/src/api/client.ts` to point to your backend API URL. (e.g., your local IP address for physical devices).
 
-## Learn more
+To run the app:
+```bash
+npx expo start
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+To run admin-web
+```bash
+cd admin-web
+npm run dev
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Scan the QR code using the Expo Go app on your phone, or press 'a' to open on an Android Emulator.
+How to Access the Dashboard
+I have included a detailed README.md in the admin-web folder with setup instructions.
 
-## Join the community
+Directory: admin-web/
+Start Command: cd admin-web then npm run dev
+Login Credentials:
+Email: admin@skincare.ai
+Password: adminpassword123
 
-Join our community of developers creating universal apps.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## 🎨 Design System
+
+- **Primary (Sky Blue)**: `#0284c7`
+- **Secondary (Emerald Green)**: `#10b981`
+- **Background**: `#f0f9ff`
+- **Surface**: `#ffffff`
+
+## 📊 Database (MongoDB)
+
+All data is stored in the provided MongoDB Atlas cluster.
+Collections: `users`, `reports`, `products`, `orders`, `chats`, `consultations`.
+
+
+
+
+
+

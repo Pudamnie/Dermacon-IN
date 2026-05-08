@@ -3,19 +3,9 @@
 # dependencies
 node_modules/
 
-# Python
-venv/
-__pycache__/
-*.pyc
-
-# Environment files
-.env
-.env*.local
-
 # Expo
 .expo/
 dist/
-build/
 web-build/
 expo-env.d.ts
 
@@ -40,11 +30,12 @@ yarn-error.*
 .DS_Store
 *.pem
 
+# local env files
+.env*.local
+
 # typescript
 *.tsbuildinfo
 
 # generated native folders
 /ios
 /android
-
-backend/app/ml/model.h5
