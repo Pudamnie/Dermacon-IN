@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.database import connect_to_database, close_database_connection
-from app.ml.inference import load_model
+from app.ml.inference import load_model, warmup_model
 from app.routers import auth, reports, products, orders, chat, consultations, chatbot, upload, admin
 
 
@@ -16,6 +16,7 @@ async def lifespan(app: FastAPI):
     # Startup
     await connect_to_database()
     load_model()
+    warmup_model()
     print("SkinCare AI Backend is running!")
     yield
     # Shutdown

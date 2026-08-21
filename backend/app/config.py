@@ -17,10 +17,7 @@ class Settings(BaseSettings):
     DEBUG: bool = True
 
     # MongoDB
-    MONGODB_URL: str = os.getenv(
-        "MONGODB_URL",
-        "mongodb+srv://madunikaishara9_db_user:skincancer2026@cluster0.iuonyq3.mongodb.net/?appName=Cluster0"
-    )
+    MONGODB_URL: str = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
     DATABASE_NAME: str = os.getenv("DATABASE_NAME", "skincare_ai")
 
     # JWT
@@ -33,21 +30,12 @@ class Settings(BaseSettings):
     CLOUDINARY_API_KEY: str = os.getenv("CLOUDINARY_API_KEY", "")
     CLOUDINARY_API_SECRET: str = os.getenv("CLOUDINARY_API_SECRET", "")
 
-    # ML Model
-    MODEL_PATH: str = os.getenv("MODEL_PATH", "app/ml/model.h5")
+    # ML Model (DermaCon-IN 3-class ConvNeXt classifier)
+    MODEL_PATH: str = os.getenv("MODEL_PATH", "app/ml/dermacon/final_development_model.keras")
 
-    # Disease classes for the skin cancer model
-    DISEASE_CLASSES: list = [
-        "Actinic Keratosis",
-        "Basal Cell Carcinoma",
-        "Dermatofibroma",
-        "Melanoma",
-        "Nevus",
-        "Pigmented Benign Keratosis",
-        "Seborrheic Keratosis",
-        "Squamous Cell Carcinoma",
-        "Vascular Lesion"
-    ]
+    # Optional body-region scope verifier. Not yet trained/present -- see
+    # app/ml/inference.py SCOPE_VERIFIER_LOADED for the real runtime status.
+    SCOPE_MODEL_PATH: str = os.getenv("SCOPE_MODEL_PATH", "app/ml/dermacon/scope_verifier.keras")
 
     class Config:
         env_file = ".env"

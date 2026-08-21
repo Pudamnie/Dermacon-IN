@@ -17,7 +17,7 @@ export default function UploadImageScreen({ navigation }: any) {
         const permission = await ImagePicker.requestCameraPermissionsAsync();
         if (!permission.granted) return Alert.alert('Permission needed');
         result = await ImagePicker.launchCameraAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          mediaTypes: ['images'],
           allowsEditing: true,
           aspect: [1, 1],
           quality: 0.8,
@@ -26,7 +26,7 @@ export default function UploadImageScreen({ navigation }: any) {
         const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (!permission.granted) return Alert.alert('Permission needed');
         result = await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          mediaTypes: ['images'],
           allowsEditing: true,
           aspect: [1, 1],
           quality: 0.8,
@@ -60,14 +60,44 @@ export default function UploadImageScreen({ navigation }: any) {
         type,
       } as any);
 
+      // Real inference + real Grad-CAM (GradientTape over ConvNeXt) measured
+      // ~30-40s on this CPU alone, before mobile network time is added, so
+      // this call gets a generous extended timeout instead of changing the
+      // shared apiClient default used everywhere else.
       const res = await apiClient.post('/upload/predict', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 90000,
       });
 
-      setResult(res.data);
+      const data = res.data;
+      if (data.status === 'invalid_image') {
+        Alert.alert('Invalid Image', data.message || 'This image is not suitable for analysis. Please upload a clear human face/cheek skin image.');
+      } else if (data.status === 'unsupported') {
+        Alert.alert('Unsupported Area', 'This model only focuses on face/cheek skin images. Please upload an image from the supported area.');
+      } else if (data.status === 'uncertain') {
+        Alert.alert('Unable to Identify', data.message || 'This condition could not be confidently identified. This model currently focuses on Acne, Melasma and Acne Conglobata.');
+      } else if (data.status === 'success') {
+        setResult(data);
+      }
     } catch (error: any) {
-      console.error("Upload error", error);
-      Alert.alert('Analysis Failed', 'Could not analyze the image. Please try again or check backend connection.');
+      // Log full technical detail for developers only -- never shown to the user.
+      console.error("Upload error", error?.message, error?.code, error?.response?.status, error?.response?.data);
+
+      if (error.code === 'ECONNABORTED') {
+        // Axios client-side timeout: the request never got a response in time.
+        // The backend may well be fine -- inference is just slow -- so this is
+        // deliberately NOT worded as a connectivity problem.
+        Alert.alert('Analysis Timed Out', 'Image analysis took longer than expected. Please try again.');
+      } else if (error.response) {
+        // The backend actually responded (e.g. 401/500) -- it is reachable,
+        // so this is not a network problem. Never surface the raw status/detail.
+        Alert.alert('Analysis Failed', 'The server could not process this image. Please try again.');
+      } else if (error.request) {
+        // Request was sent but no response was ever received -- genuine network failure.
+        Alert.alert('Connection Error', 'Unable to reach the analysis server. Please check your connection and try again.');
+      } else {
+        Alert.alert('Analysis Failed', 'Something went wrong while analyzing this image. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

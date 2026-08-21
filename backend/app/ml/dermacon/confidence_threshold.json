@@ -1,0 +1,29 @@
+{
+  "selected_threshold": {
+    "threshold": 0.3,
+    "coverage": 1.0,
+    "accepted_samples": 44.0,
+    "rejected_samples": 0.0,
+    "rejection_rate": 0.0,
+    "accepted_accuracy": 0.6363636363636364,
+    "accepted_macro_f1": 0.635439360929557
+  },
+  "tuned_on": "validation_only",
+  "rule": ">= 0.7 coverage, smallest qualifying threshold from a predeclared grid",
+  "candidates": [
+    0.3,
+    0.35,
+    0.4,
+    0.45,
+    0.5,
+    0.55,
+    0.6,
+    0.65,
+    0.7,
+    0.75,
+    0.8,
+    0.85,
+    0.9
+  ],
+  "status": "SELECTED"
+}

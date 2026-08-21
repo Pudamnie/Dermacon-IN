@@ -1,0 +1,17 @@
+{
+  "disclaimer": "The descriptions and risk/action text below are a non-clinical placeholder for the application team's UI copy only. They have not been reviewed or approved by a dermatologist or any clinician, and must be replaced with clinician-approved copy before any real (non-research) use of this application.",
+  "conditions": {
+    "Acne": {
+      "description": "A common skin condition where hair follicles become blocked with oil and dead skin, producing whiteheads, blackheads, pimples, or deeper lumps, most often on the face.",
+      "risk_action": "Consult a dermatologist for confirmation and an appropriate treatment plan, especially if lesions are painful, widespread, or scarring."
+    },
+    "Melasma": {
+      "description": "A common pigmentation condition causing brown or grey-brown patches, usually on the cheeks, forehead, or upper lip, often linked to sun exposure or hormonal changes.",
+      "risk_action": "Consult a dermatologist for confirmation and guidance on sun protection and treatment options."
+    },
+    "Acne Conglobata": {
+      "description": "A severe, uncommon form of acne with deep, interconnected nodules and abscesses that can lead to significant scarring if untreated.",
+      "risk_action": "Consult a dermatologist for confirmation; this form of acne often needs prompt, more intensive medical treatment."
+    }
+  }
+}

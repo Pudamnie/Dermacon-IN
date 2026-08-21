@@ -4,13 +4,15 @@ Handles image upload, ML prediction, Grad-CAM generation, and Cloud Storage.
 """
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
 from app.auth.jwt_handler import get_current_user, require_role
-from app.ml.inference import predict, generate_gradcam, MODEL_LOADED
+from app.ml import inference as ml_inference
+from app.ml.inference import predict, generate_gradcam
 from app.config import get_settings
 from app.database import get_database
 import cloudinary
 import cloudinary.uploader
 from datetime import datetime, timezone
 import base64
+import time
 
 settings = get_settings()
 router = APIRouter(prefix="/upload", tags=["Upload & ML"])
@@ -28,19 +30,47 @@ async def predict_image(
     current_user: dict = Depends(require_role("patient"))
 ):
     """Upload a skin image, get AI prediction, and store in cloud."""
+    t0 = time.time()
+    print(f"[upload/predict] request received from user={current_user.get('_id')} content_type={file.content_type}")
+
     if not file.content_type or not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="File must be an image")
+        print(f"[upload/predict] rejected non-image content_type={file.content_type} (+{time.time()-t0:.2f}s)")
+        return {
+            "status": "invalid_image",
+            "message": "This image is not suitable for analysis. Please upload a clear, well-lit face/cheek skin image.",
+            "model_loaded": ml_inference.MODEL_LOADED,
+        }
 
     image_bytes = await file.read()
+    print(f"[upload/predict] read {len(image_bytes)} bytes (+{time.time()-t0:.2f}s)")
     if len(image_bytes) > 10 * 1024 * 1024:  # 10MB limit
-        raise HTTPException(status_code=400, detail="Image too large (max 10MB)")
+        print(f"[upload/predict] rejected oversized file ({len(image_bytes)} bytes) (+{time.time()-t0:.2f}s)")
+        return {
+            "status": "invalid_image",
+            "message": "This image file is too large. Please upload a clear, well-lit face/cheek skin image under 10MB.",
+            "model_loaded": ml_inference.MODEL_LOADED,
+        }
 
-    # Run prediction
-    result = predict(image_bytes)
+    # Run prediction (quality gate -> optional scope verifier -> classifier -> confidence gate)
+    try:
+        result = predict(image_bytes)
+    except Exception as e:
+        print(f"[upload/predict] predict() raised an unexpected exception: {e} (+{time.time()-t0:.2f}s)")
+        return {
+            "status": "invalid_image",
+            "message": "The image could not be analyzed due to an unexpected error. Please try a different photo.",
+            "model_loaded": ml_inference.MODEL_LOADED,
+        }
+    print(f"[upload/predict] predict() -> status={result['status']} (+{time.time()-t0:.2f}s)")
 
-    # Generate Grad-CAM
+    if result["status"] != "success":
+        result["model_loaded"] = ml_inference.MODEL_LOADED
+        return result
+
+    # Only accepted predictions get a real Grad-CAM, cloud upload and DB report
     gradcam_b64 = None
-    gradcam_bytes = generate_gradcam(image_bytes)
+    gradcam_bytes = generate_gradcam(image_bytes, class_index=result["class_index"])
+    print(f"[upload/predict] generate_gradcam() -> {'ok' if gradcam_bytes else 'unavailable'} (+{time.time()-t0:.2f}s)")
     if gradcam_bytes:
         gradcam_b64 = base64.b64encode(gradcam_bytes).decode("utf-8")
 
@@ -67,8 +97,9 @@ async def predict_image(
                 )
                 cloud_gradcam_url = gc_upload.get("secure_url")
     except Exception as e:
-        print(f"Cloudinary upload failed: {e}")
+        print(f"[upload/predict] Cloudinary upload failed: {e}")
         # Continue even if cloud upload fails so the user still gets prediction
+    print(f"[upload/predict] cloud upload stage done (+{time.time()-t0:.2f}s)")
 
     # Auto-save report to DB
     try:
@@ -95,9 +126,11 @@ async def predict_image(
         await db.reports.insert_one(report_doc)
         report_doc["_id"] = str(report_doc["_id"])
     except Exception as e:
-        print(f"Failed to auto-save report: {e}")
+        print(f"[upload/predict] Failed to auto-save report: {e}")
+    print(f"[upload/predict] responding (+{time.time()-t0:.2f}s total)")
 
     return {
+        "status": result["status"],
         "prediction": result["prediction"],
         "short_name": result.get("short_name", ""),
         "confidence": result["confidence"],
@@ -107,13 +140,13 @@ async def predict_image(
         "image_base64": image_b64,
         "gradcam_base64": gradcam_b64,
         "cloud_url": cloud_image_url,
-        "model_loaded": MODEL_LOADED,
+        "model_loaded": ml_inference.MODEL_LOADED,
     }
 
 @router.get("/model-status")
 async def model_status(current_user: dict = Depends(get_current_user)):
     """Check if the ML model is loaded."""
-    return {"model_loaded": MODEL_LOADED}
+    return {"model_loaded": ml_inference.MODEL_LOADED}
 
 @router.post("/avatar")
 async def upload_avatar(

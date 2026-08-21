@@ -4,7 +4,7 @@ import { Platform } from 'react-native';
 
 // Use 10.0.2.2 for Android Emulator, localhost for iOS simulator, or your local IP for physical device
 // const API_BASE_URL = 'http://10.0.2.2:8000/api'; // Android Emulator default
-const API_BASE_URL = 'http://10.171.82.44:8000/api'; // Physical device over Wi-Fi
+const API_BASE_URL = 'http://10.233.166.62:8000/api'; // Physical device over Wi-Fi
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -36,7 +36,7 @@ apiClient.interceptors.response.use(
       // Clear token and user data on 401 error
       await AsyncStorage.removeItem('userToken');
       await AsyncStorage.removeItem('userData');
-      
+
       // We don't want to alert on /auth/me because that's a silent check
       if (error.config.url !== '/auth/me') {
         // You could use a global event emitter or a state update here if needed

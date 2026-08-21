@@ -1,0 +1,41 @@
+{
+  "input": {
+    "width": 224,
+    "height": 224,
+    "color_space": "RGB"
+  },
+  "preprocessing": {
+    "steps": [
+      "deterministic aspect-ratio-preserving letterbox resize to 224x224 (bilinear, black padding)",
+      "ConvNeXtTiny's own built-in include_preprocessing=True normalization layer"
+    ],
+    "note": "Do NOT call ConvNeXt preprocess_input() or rescale pixels externally -- the model's own internal Normalization layer expects raw float32 [0,255] input, exactly as in FINAL_PIPELINE_3CLASS/config/preprocessing_config.json."
+  },
+  "output": {
+    "format": "class probabilities (softmax) in CLASS_NAMES order",
+    "class_order": [
+      "Acne",
+      "Melasma",
+      "Acne Conglobata"
+    ],
+    "selected_class": "argmax of the probability vector",
+    "confidence": "max probability in the vector"
+  },
+  "rejection_rule": {
+    "rule": "reject (status=uncertain) if confidence is below the saved validation-derived threshold",
+    "threshold_source": "confidence_threshold.json, tuned_on=validation_only \u2014 never test-derived"
+  },
+  "invalid_image_checks": {
+    "must_run_before_inference": true,
+    "checks": {
+      "corrupt_or_unreadable": "tf.io.decode_image fails or raises",
+      "too_small_or_abnormal_dimensions": "height or width outside [64, 10000] pixels",
+      "very_dark": "mean pixel brightness < 25.0",
+      "very_bright": "mean pixel brightness > 230.0",
+      "very_blurry": "Sobel-edge variance < 50.0"
+    },
+    "source_function": "assess_image_quality (Section 11 of this notebook)"
+  },
+  "body_region_check": "not_implemented_this_round",
+  "body_region_check_note": "This classifier cannot verify an uploaded image is actually a Head-Cheeks image; this is an honest limitation, not a claimed capability."
+}
